@@ -7,6 +7,8 @@ import {
   ScrollView
 } from 'react-native';
 
+import Moment from 'moment';
+
 // https://github.com/tutsplus/create-common-app-layouts-in-react-native
 
 // https://networksynapse.net/quick-introduction-to-react-natives-calendar-events/
@@ -28,9 +30,10 @@ export default class Calendar extends Component {
 
 		var date = new Date();
 		this.state = {
-	      calendars: null, // list of CalDAV calendars to display
-	      year: date.getFullYear(),
-	      month: date.getMonth(),
+	      calendars: [], 	// list of CalDAV calendars to display
+	      events: [], 		// what events to display on the calander
+	      year: date.getFullYear(),	// selected month
+	      month: date.getMonth(),	// selected year
 	    }
 
 
@@ -44,7 +47,7 @@ export default class Calendar extends Component {
 	}
 
 	componentWillMount () {
-		//this.fetchEvents();
+		this.fetchEvents(); // fetch events for the current month
 	}
 
 	renderWeekDays() {
@@ -74,14 +77,18 @@ export default class Calendar extends Component {
 
 	renderDays(week_days) {
 		return week_days.map((day, index) => {
+
+			const date = Moment([this.state.year, this.state.month, day]).format("YY-MM-DD");
+
 			return (
 				<Button 
-					label={day}
 					key={index} 
 					onPress={this.press.bind(this)} 
 					styles={{button: styles.day, label: styles.day_text}}
 					noDefaultStyles={true}
-				/>	
+				>	
+					<Text style={styles.tiny_text}>{date}</Text>
+				</Button>
 			);
 		});
 	}
@@ -114,18 +121,29 @@ export default class Calendar extends Component {
   	}
 
   	fetchEvents(fn = null) {
-		//var startDate = new Date(this.state.year, this.state.month, 1);
-		//var endDate = new Date(this.state.year, this.state.month + 1, 0);
 
+  		console.log("year: " + this.state.year + " month: " + this.state.month);
 
-		var startDate = new Date('05 January 2019 14:48 UTC');
-    	var endDate = new Date('05 January 2019 15:48 UTC');
+  		Moment.locale('en');
+    	var dt = '2016-05-02T00:00:00';
 
-		console.log("Fetch events with start date: " + startDate.toISOString() + " -> end date: " + endDate.toISOString());
+    	const startDate = Moment([this.state.year, this.state.month, 1]).toISOString();
 
-		// if calendars is null, it will assume ALL calendars - 3rd arg , /*this.state.calendars*/ null
-  		RNCalendarEvents.fetchAllEvents(startDate.toISOString(), endDate.toISOString()).then(events => {
+    	// get the number of days for this month
+		const daysInMonth = Moment(startDate).daysInMonth();
+
+		// we are adding the days in this month to the start date (minus the first day)
+		const endDate = Moment(startDate).add(daysInMonth - 1, 'days').toISOString();
+
+    	console.log(Moment([this.state.year, this.state.month, 1]).format('MMM'));
+    	console.log(startDate);
+    	console.log(endDate);
+
+		// if calendars is null, it will assume ALL calendars - 3rd arg , /*this.state.calendars* / null
+  		RNCalendarEvents.fetchAllEvents(startDate, endDate).then(events => {
   			console.log("Found events: " + events.length);
+  			console.log(events);
+  			this.setState({events: events});
   			/*
   			if (fn != null) {
 	    		fn();
@@ -134,6 +152,8 @@ export default class Calendar extends Component {
   	}
 
 	render() {
+		const monthName = Moment([this.state.year, this.state.month, 1]).format('MMM');
+
 		return (
 			<ScrollView style={styles.container}>
 				<View style={styles.header}>
@@ -164,7 +184,7 @@ export default class Calendar extends Component {
 							>
 			                    <Icon name="chevron-left" size={18} color="#333" />
 			                </Button>
-							<Text style={styles.calendar_header_text}>2013</Text>
+							<Text style={styles.calendar_header_text}>{this.state.year}</Text>
 							<Button 
 								noDefaultStyles={true}
 								onPress={this.press.bind(this)}
@@ -180,7 +200,7 @@ export default class Calendar extends Component {
 							>
 			                    <Icon name="chevron-left" size={18} color="#333" />
 			                </Button>
-							<Text style={styles.calendar_header_text}>November</Text>
+							<Text style={styles.calendar_header_text}>{monthName}</Text>
 							<Button 
 								noDefaultStyles={true}
 								onPress={this.press.bind(this)}
@@ -292,13 +312,18 @@ const styles = StyleSheet.create({
 	day: {
 		flex: 1,
 		backgroundColor: '#F5F5F5',
-		padding: 17,
+		padding: 2,
 		margin: 2
 	},
 	day_text: {
 		textAlign: 'center',
 		color: '#A9A9A9',
 		fontSize: 25
+	},
+	tiny_text: {
+		textAlign: 'center',
+		color: '#A9A9A9',
+		fontSize: 10
 	},
 	notes: {
 		marginTop: 10,

@@ -9,6 +9,7 @@
   "dependencies": {
     "android": "0.0.8",
     "lodash": "^4.17.11",
+    "moment": "^2.22.2",
     "react": "16.6.1",
     "react-native": "0.57.7",
     "react-native-calendar-events": "^1.6.3",

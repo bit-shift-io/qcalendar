@@ -33,3 +33,4 @@ https://github.com/wmcmahan/react-native-calendar-events
 
 lodash
 react-native-vector-icons
+moment
