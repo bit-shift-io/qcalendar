@@ -12,6 +12,9 @@ import {Platform, StyleSheet, Text, View, Button, Alert, Linking} from 'react-na
 // https://networksynapse.net/quick-introduction-to-react-natives-calendar-events/
 import RNCalendarEvents from 'react-native-calendar-events'; // calander
 
+// https://code.tutsplus.com/tutorials/common-react-native-app-layouts-calendar-page--cms-27641
+import Calendar from './pages/Calendar';
+
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
   android:
@@ -101,10 +104,16 @@ export default class App extends Component<Props> {
 
   render() {
     return (
+      <Calendar app={this} />
+      );
+  }
+
+  render_old() {
+    return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
+
+        <Calendar />
+
         <Button
             onPress={this._onPressButton}
             title="Save Test Event"

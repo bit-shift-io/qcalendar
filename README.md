@@ -29,3 +29,7 @@ To run the app for Android after loading the emulator:
 Using the following custom packages:
 
 https://github.com/wmcmahan/react-native-calendar-events
+
+
+lodash
+react-native-vector-icons
