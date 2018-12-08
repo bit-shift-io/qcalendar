@@ -23,3 +23,8 @@ sdk.dir = /home/fabian/Android/Sdk/
 To run the app for Android after loading the emulator:
 
     react-native run-android
+
+
+Using the following custom packages:
+
+https://github.com/wmcmahan/react-native-calendar-events

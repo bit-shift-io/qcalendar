@@ -9,7 +9,8 @@
   "dependencies": {
     "android": "0.0.8",
     "react": "16.6.1",
-    "react-native": "0.57.7"
+    "react-native": "0.57.7",
+    "react-native-calendar-events": "^1.6.3"
   },
   "devDependencies": {
     "babel-jest": "23.6.0",
