@@ -20,6 +20,33 @@ import Button from '../components/Button';
 
 export default class Calendar extends Component {
 	
+	constructor(props) {
+		super(props);
+
+		this.fetchEvents = this.fetchEvents.bind(this);
+		this.refreshCalendars = this.refreshCalendars.bind(this);
+
+		var date = new Date();
+		this.state = {
+	      calendars: null, // list of CalDAV calendars to display
+	      year: date.getFullYear(),
+	      month: date.getMonth(),
+	    }
+
+
+	    //this.fetchEvents();
+	    /*
+	    // refresh the calanders
+	    // get all events for this month
+	    this.refreshCalendars(() => { 
+	    	this.fetchEvents() 
+	    });*/
+	}
+
+	componentWillMount () {
+		//this.fetchEvents();
+	}
+
 	renderWeekDays() {
 		let weekdays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 		return weekdays.map((day) => {
@@ -76,11 +103,34 @@ export default class Calendar extends Component {
 	}
 
 
-	listCalanders() {
-	    RNCalendarEvents.findCalendars().then(calanders =>{
-	      console.log("Found calanders:");
-	      console.log(calanders);
+	refreshCalendars(fn = null) {
+	    RNCalendarEvents.findCalendars().then(calendars =>{
+	    	console.log("Found calendars: " + calendars.length);
+	    	this.setState({calendars: calendars});
+	    	if (fn != null) {
+	    		fn();
+	    	}
 	    }).catch(error => console.log('Find Calanders Error: ', error));
+  	}
+
+  	fetchEvents(fn = null) {
+		//var startDate = new Date(this.state.year, this.state.month, 1);
+		//var endDate = new Date(this.state.year, this.state.month + 1, 0);
+
+
+		var startDate = new Date('05 January 2019 14:48 UTC');
+    	var endDate = new Date('05 January 2019 15:48 UTC');
+
+		console.log("Fetch events with start date: " + startDate.toISOString() + " -> end date: " + endDate.toISOString());
+
+		// if calendars is null, it will assume ALL calendars - 3rd arg , /*this.state.calendars*/ null
+  		RNCalendarEvents.fetchAllEvents(startDate.toISOString(), endDate.toISOString()).then(events => {
+  			console.log("Found events: " + events.length);
+  			/*
+  			if (fn != null) {
+	    		fn();
+	    	}*/
+  		}).catch(error => console.log('Fetch Events Error: ', error));
   	}
 
 	render() {
@@ -89,7 +139,7 @@ export default class Calendar extends Component {
 				<View style={styles.header}>
 					<Button 
 						noDefaultStyles={true}
-						onPress={this.listCalanders} 
+						onPress={this.fetchEvents} 
 						styles={{button: styles.header_item}}
 					>
 	                    <View style={styles.header_button}>
