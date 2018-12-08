@@ -13,7 +13,9 @@ npm install -g react-native-cli
 
 
 # setup settings for this project
-echo "sdk.dir = /Users/$(whoami)/Library/Android/sdk" > android/local.properties
+echo "sdk.dir = /home/$(whoami)/Android/Sdk" > android/local.properties
 
 
 npm install
+
+react-native link

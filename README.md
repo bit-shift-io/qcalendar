@@ -6,6 +6,7 @@ https://facebook.github.io/react-native/docs/getting-started.html
 click "Building Projects with Native Code" 
 we are NOT using Expo!
 
+Ensure Android Studio is installed
 
 add to your .bash_profile:
 
