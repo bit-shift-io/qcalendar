@@ -9,6 +9,8 @@ import {
 
 import Moment from 'moment';
 
+import LinearGradient from 'react-native-linear-gradient';
+
 // https://github.com/tutsplus/create-common-app-layouts-in-react-native
 
 // https://networksynapse.net/quick-introduction-to-react-natives-calendar-events/
@@ -75,10 +77,51 @@ export default class Calendar extends Component {
 		return weeks_r;
 	}
 
+	getEventsForDate(momentDate) {
+
+		var results = [];
+		const dateStr = momentDate.format("YY-MM-DD");
+
+		for (let i = 0; i < this.state.events.length; ++i) {
+			//console.log("EVENT----------");
+			let event = this.state.events[i];
+			console.log(event);
+			var startDate = event.startDate;
+			var endDate = event.endDate;
+
+			if (momentDate.isBetween(startDate, endDate)) {
+				//console.log("we found an event that spans multiple days, of which " + dateStr + " is inside this range");
+				results.push(event);
+			}
+			else if (momentDate.isSame(startDate, 'day')) {
+				//console.log("we found an event that is on " + dateStr);
+				results.push(event);
+			}
+
+			//console.log("----------");
+		}
+
+		return results;
+	}
+
 	renderDays(week_days) {
 		return week_days.map((day, index) => {
 
-			const date = Moment([this.state.year, this.state.month, day]).format("YY-MM-DD");
+			var momentDate = Moment([this.state.year, this.state.month, day]);
+			var events = this.getEventsForDate(momentDate);
+			const dateStr = momentDate.format("YY-MM-DD");
+
+			var eventElements = [];
+			for (let i = 0; i < events.length; ++i) {
+				var event = events[i];
+				eventElements.push(
+					<Text key={i} style={[styles.tiny_text_left, {color: event.calendar.color}]}>{event.title}</Text>
+					);
+			}
+
+			// FABAIN TODO:
+			// https://github.com/catalinmiron/react-native-css-gradient
+			// this supports repeating gradients
 
 			return (
 				<Button 
@@ -87,7 +130,17 @@ export default class Calendar extends Component {
 					styles={{button: styles.day, label: styles.day_text}}
 					noDefaultStyles={true}
 				>	
-					<Text style={styles.tiny_text}>{date}</Text>
+					<View style={{flex:1}}>
+						<LinearGradient 
+							useAngle={true}
+							angle={-45}
+							angleCenter={{ x: 0.5, y: 0.5}}
+            				locations={[0,0.5,0.5, 1.0]}
+            				colors={['#ccc', '#ccc', '#dbdbdb', '#dbdbdb']} style={{flex:1}}>
+							<Text style={styles.tiny_text}>{day}</Text>
+							{eventElements}
+						</LinearGradient>
+					</View>
 				</Button>
 			);
 		});
@@ -131,13 +184,14 @@ export default class Calendar extends Component {
 
     	// get the number of days for this month
 		const daysInMonth = Moment(startDate).daysInMonth();
+		console.log("Days in month:" + daysInMonth);
 
 		// we are adding the days in this month to the start date (minus the first day)
 		const endDate = Moment(startDate).add(daysInMonth - 1, 'days').toISOString();
 
     	console.log(Moment([this.state.year, this.state.month, 1]).format('MMM'));
-    	console.log(startDate);
-    	console.log(endDate);
+    	console.log("Start Date:" + startDate);
+    	console.log("End Date:" + endDate);
 
 		// if calendars is null, it will assume ALL calendars - 3rd arg , /*this.state.calendars* / null
   		RNCalendarEvents.fetchAllEvents(startDate, endDate).then(events => {
@@ -315,6 +369,13 @@ const styles = StyleSheet.create({
 		padding: 2,
 		margin: 2
 	},
+	today: {
+		flex: 1,
+		backgroundColor: '#F5F5F5',
+		padding: 2,
+		margin: 2
+	},
+
 	day_text: {
 		textAlign: 'center',
 		color: '#A9A9A9',
@@ -322,6 +383,11 @@ const styles = StyleSheet.create({
 	},
 	tiny_text: {
 		textAlign: 'center',
+		color: '#A9A9A9',
+		fontSize: 10
+	},
+	tiny_text_left: {
+		textAlign: 'left',
 		color: '#A9A9A9',
 		fontSize: 10
 	},

@@ -33,4 +33,13 @@ https://github.com/wmcmahan/react-native-calendar-events
 
 lodash
 react-native-vector-icons
+react-native-linear-gradient
 moment
+
+
+useful command lines for react:
+
+react-native start
+react-native run-android
+react-native log-android
+
