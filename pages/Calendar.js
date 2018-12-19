@@ -7,9 +7,10 @@ import {
   ScrollView
 } from 'react-native';
 
-import Moment from 'moment';
-
+import moment from 'moment';
 import LinearGradient from 'react-native-linear-gradient';
+
+import { testData, useTestData } from '../helpers/TestData';
 
 // https://github.com/tutsplus/create-common-app-layouts-in-react-native
 
@@ -21,6 +22,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { range } from 'lodash';
 
 import Button from '../components/Button';
+import Day from '../components/Day';
 
 export default class Calendar extends Component {
 	
@@ -107,41 +109,11 @@ export default class Calendar extends Component {
 	renderDays(week_days) {
 		return week_days.map((day, index) => {
 
-			var momentDate = Moment([this.state.year, this.state.month, day]);
+			var momentDate = moment([this.state.year, this.state.month, day]);
 			var events = this.getEventsForDate(momentDate);
-			const dateStr = momentDate.format("YY-MM-DD");
-
-			var eventElements = [];
-			for (let i = 0; i < events.length; ++i) {
-				var event = events[i];
-				eventElements.push(
-					<Text key={i} style={[styles.tiny_text_left, {color: event.calendar.color}]}>{event.title}</Text>
-					);
-			}
-
-			// FABAIN TODO:
-			// https://github.com/catalinmiron/react-native-css-gradient
-			// this supports repeating gradients
 
 			return (
-				<Button 
-					key={index} 
-					onPress={this.press.bind(this)} 
-					styles={{button: styles.day, label: styles.day_text}}
-					noDefaultStyles={true}
-				>	
-					<View style={{flex:1}}>
-						<LinearGradient 
-							useAngle={true}
-							angle={-45}
-							angleCenter={{ x: 0.5, y: 0.5}}
-            				locations={[0,0.5,0.5, 1.0]}
-            				colors={['#ccc', '#ccc', '#dbdbdb', '#dbdbdb']} style={{flex:1}}>
-							<Text style={styles.tiny_text}>{day}</Text>
-							{eventElements}
-						</LinearGradient>
-					</View>
-				</Button>
+				<Day key={index} events={events} date={momentDate}/>
 			);
 		});
 	}
@@ -177,57 +149,44 @@ export default class Calendar extends Component {
 
   		console.log("year: " + this.state.year + " month: " + this.state.month);
 
-  		Moment.locale('en');
+  		moment.locale('en');
     	var dt = '2016-05-02T00:00:00';
 
-    	const startDate = Moment([this.state.year, this.state.month, 1]).toISOString();
+    	const startDate = moment([this.state.year, this.state.month, 1]).toISOString();
 
     	// get the number of days for this month
-		const daysInMonth = Moment(startDate).daysInMonth();
+		const daysInMonth = moment(startDate).daysInMonth();
 		console.log("Days in month:" + daysInMonth);
 
 		// we are adding the days in this month to the start date (minus the first day)
-		const endDate = Moment(startDate).add(daysInMonth - 1, 'days').toISOString();
+		const endDate = moment(startDate).add(daysInMonth - 1, 'days').toISOString();
 
-    	console.log(Moment([this.state.year, this.state.month, 1]).format('MMM'));
+    	console.log(moment([this.state.year, this.state.month, 1]).format('MMM'));
     	console.log("Start Date:" + startDate);
     	console.log("End Date:" + endDate);
 
-		// if calendars is null, it will assume ALL calendars - 3rd arg , /*this.state.calendars* / null
-  		RNCalendarEvents.fetchAllEvents(startDate, endDate).then(events => {
-  			console.log("Found events: " + events.length);
-  			console.log(events);
-  			this.setState({events: events});
-  			/*
-  			if (fn != null) {
-	    		fn();
-	    	}*/
-  		}).catch(error => console.log('Fetch Events Error: ', error));
+		if (useTestData == true) {
+			this.setState({events: testData.events});
+		}
+		else {
+			// if calendars is null, it will assume ALL calendars - 3rd arg , /*this.state.calendars* / null
+			RNCalendarEvents.fetchAllEvents(startDate, endDate).then(events => {
+				console.log("Found events: " + events.length);
+				console.log(events);
+				this.setState({events: events});
+				/*
+				if (fn != null) {
+					fn();
+				}*/
+		  	}).catch(error => console.log('Fetch Events Error: ', error));
+		}
   	}
 
 	render() {
-		const monthName = Moment([this.state.year, this.state.month, 1]).format('MMM');
+		const monthName = moment([this.state.year, this.state.month, 1]).format('MMM');
 
 		return (
 			<ScrollView style={styles.container}>
-				<View style={styles.header}>
-					<Button 
-						noDefaultStyles={true}
-						onPress={this.fetchEvents} 
-						styles={{button: styles.header_item}}
-					>
-	                    <View style={styles.header_button}>
-	                    	<Icon name="chevron-left" size={30} color="#FFF" />
-	                    	<Text style={[styles.header_text]}> Menu</Text>
-	                    </View>
-	                </Button>
-	                <View style={styles.header_item}>
-	                	<Text style={[styles.header_text, styles.text_center, styles.bold_text]}>Calendar</Text>
-	                </View>
-					<View style={styles.header_item}>
-	                	<Text style={[styles.header_text, styles.text_right]}>Today</Text>
-	                </View>
-				</View>
 				
 				<View>
 					<View style={styles.calendar_header}>

@@ -4,28 +4,28 @@ import {
   StyleSheet,
   Text,
   TouchableHighlight,
+  View
 } from 'react-native';
 
-const Button = (props) => {
+export default class Button extends Component {
 	
-	function getContent(){
-		if(props.children){
-			return props.children;
-		}
-		return <Text style={props.styles.label}>{props.label}</Text>
+	static defaultProps = {
+		style: {}
 	}
 
-	return (
-		<TouchableHighlight 
-			underlayColor="#ccc" 
-			onPress={props.onPress} 
-			style={[
-				props.noDefaultStyles ? '' : styles.button, 
-				props.styles ? props.styles.button : '']}
-		>
-		    { getContent() }
-		</TouchableHighlight>
-	);
+	render() {
+		return (
+			<TouchableHighlight 
+				underlayColor="#ccc" 
+				onPress={this.props.onPress} 
+				style={[{flex: 1}, this.props.style]}>
+
+				<View style={this.props.style}>
+					{this.props.children}	
+				</View>
+			</TouchableHighlight>
+		);
+	}
 }
 
 const styles = StyleSheet.create({
@@ -35,5 +35,3 @@ const styles = StyleSheet.create({
         padding: 20
     },
 });
-
-export default Button;
