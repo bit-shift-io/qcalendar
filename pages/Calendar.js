@@ -31,13 +31,15 @@ export default class Calendar extends Component {
 
 		this.fetchEvents = this.fetchEvents.bind(this);
 		this.refreshCalendars = this.refreshCalendars.bind(this);
-
+		this._onDayPress = this._onDayPress.bind(this);
+		
 		var date = new Date();
 		this.state = {
 	      calendars: [], 	// list of CalDAV calendars to display
 	      events: [], 		// what events to display on the calander
 	      year: date.getFullYear(),	// selected month
-	      month: date.getMonth(),	// selected year
+		  month: date.getMonth(),	// selected year
+		  selectedDate: moment(), // today!
 	    }
 
 
@@ -67,10 +69,10 @@ export default class Calendar extends Component {
 		var weeks_r = [];
 		var seven_days = [];
 		var count = 0;
-		days.forEach((day) => {
+		days.forEach((day, index) => {
 		  count += 1;
 		  seven_days.push(day);
-		  if(count == 7){
+		  if(count == 7 || index == (days.length - 1)) {
 		    weeks_r.push(seven_days)
 		    count = 0;
 		    seven_days = [];
@@ -106,29 +108,57 @@ export default class Calendar extends Component {
 		return results;
 	}
 
-	renderDays(week_days) {
-		return week_days.map((day, index) => {
+	_onDayPress(day) {
+		console.log("day pressed!");
+		/*
+		day.setSelected(true);
+		if (this.state.selectedDay) {
+			this.state.selectedDay.setSelected(false);
+		}*/
+		this.setState({selectedDate: day.props.date});
+	}
 
-			var momentDate = moment([this.state.year, this.state.month, day]);
-			var events = this.getEventsForDate(momentDate);
-
+	renderDays(weekDays) {
+		return weekDays.map((date, index) => {
+			var events = this.getEventsForDate(date);
 			return (
-				<Day key={index} events={events} date={momentDate}/>
+				<Day key={date.toISOString()} events={events} date={date} monthStartDate={this.startDate}
+					onPress={this._onDayPress}/>
 			);
 		});
 	}
 
 	renderWeeks() {
-		let past_month_days = range(27, 31);
-		let this_month_days = range(1, 30);
+		let lastSunday = this.startDate.startOf('week');
+		let numberOfDaysFromLastSunday = this.startDate.diff(lastSunday, 'days');
 
-		let days = past_month_days.concat(past_month_days, this_month_days);
-		let grouped_days = this.getWeeksArray(days);
+		let pastMonthDays = range(lastSunday.date(), lastSunday.date() + numberOfDaysFromLastSunday);
+		let thisMonthDays = range(1, this.startDate.daysInMonth() + 1);
+		let totalDays = pastMonthDays.length + thisMonthDays.length;
+		let numberOfDaysNextMonth = 7 - (totalDays % 7);
+		let nextMonthDays = range(1, numberOfDaysNextMonth + 1);
 
-		return grouped_days.map((week_days, index) => {
+		let lastMonth = this.startDate.subtract(1, 'months');
+		let pastMonthDates = pastMonthDays.map((item, index) => {
+			return moment([lastMonth.year(), lastMonth.month(), item]);
+		});
+
+		let thisMonthDates = thisMonthDays.map((item, index) => {
+			return moment([this.state.year, this.state.month, item]);
+		});
+
+		let nextMonth = this.startDate.add(1, 'months');
+		let nextMonthDates = nextMonthDays.map((item, index) => {
+			return moment([nextMonth.year(), nextMonth.month(), item]);
+		});
+
+		let dates = pastMonthDates.concat(thisMonthDates, nextMonthDates);
+		let groupedDates = this.getWeeksArray(dates);
+
+		return groupedDates.map((weekDays, index) => {
 			return (
 				<View key={index} style={styles.week_days}>
-					{ this.renderDays(week_days) }				
+					{ this.renderDays(weekDays) }				
 				</View>
 			);
 		});
@@ -144,6 +174,14 @@ export default class Calendar extends Component {
 	    	}
 	    }).catch(error => console.log('Find Calanders Error: ', error));
   	}
+
+	get startDate() {
+		return moment([this.state.year, this.state.month, 1]);
+	}
+
+	get endDate() {
+		this.startDate.add(this.startDate.daysInMonth() - 1, 'days')
+	}
 
   	fetchEvents(fn = null) {
 
@@ -180,7 +218,37 @@ export default class Calendar extends Component {
 				}*/
 		  	}).catch(error => console.log('Fetch Events Error: ', error));
 		}
-  	}
+	  }
+	  
+	  _renderSelectedDay() {
+		let selectedDate = this.state.selectedDate;
+		var eventElements = [];
+		if (selectedDate) {
+			let events = this.getEventsForDate(selectedDate);
+			for (let i = 0; i < events.length; ++i) {
+				var event = events[i];
+				eventElements.push(
+					<Text key={i} style={[styles.notes_text, {color: event.calendar.color}]}>
+						{event.title}
+					</Text>
+					);
+			}
+		}
+
+		  return (
+			<View style={styles.notes}>	
+					<View style={styles.notes_notes}>
+						{eventElements}
+					</View>
+					<View style={[styles.notes_selected_date]}>
+						<Text style={styles.big_text}>{selectedDate.date()}</Text>
+						<View style={styles.inline}>
+							<Text style={styles.small_text}> {selectedDate.format('dddd').toUpperCase()}</Text>
+						</View>
+					</View>
+				</View>
+		  );
+	  }
 
 	render() {
 		const monthName = moment([this.state.year, this.state.month, 1]).format('MMM');
@@ -188,74 +256,15 @@ export default class Calendar extends Component {
 		return (
 			<ScrollView style={styles.container}>
 				
-				<View>
-					<View style={styles.calendar_header}>
-						<View style={styles.calendar_header_item}>
-							<Button 
-								noDefaultStyles={true}
-								onPress={this.press.bind(this)}
-							>
-			                    <Icon name="chevron-left" size={18} color="#333" />
-			                </Button>
-							<Text style={styles.calendar_header_text}>{this.state.year}</Text>
-							<Button 
-								noDefaultStyles={true}
-								onPress={this.press.bind(this)}
-							>
-			                    <Icon name="chevron-right" size={18} color="#333" />
-			                </Button>
-						</View>
-
-						<View style={styles.calendar_header_item}>
-							<Button 
-								noDefaultStyles={true}
-								onPress={this.press.bind(this)}
-							>
-			                    <Icon name="chevron-left" size={18} color="#333" />
-			                </Button>
-							<Text style={styles.calendar_header_text}>{monthName}</Text>
-							<Button 
-								noDefaultStyles={true}
-								onPress={this.press.bind(this)}
-							>
-			                    <Icon name="chevron-right" size={18} color="#333" />
-			                </Button>
-						</View>
-					</View>
-					<View style={styles.calendar_weekdays}>
-						{ this.renderWeekDays() }
-					</View>
-					<View style={styles.calendar_days}>
-						{ this.renderWeeks() }
-					</View>
+				<View style={styles.calendar_weekdays}>
+					{ this.renderWeekDays() }
 				</View>
-
-				<View style={styles.notes}>
-					<View style={styles.notes_notes}>
-						<Text style={styles.notes_text}>Riding my bike around the neighborhood.</Text>
-					</View>
-					<View style={[styles.notes_selected_date]}>
-						<Text style={styles.small_text}>8:23 PM</Text>
-						<Text style={styles.big_text}>14</Text>
-						<View style={styles.inline}>
-							<Icon name="bicycle" size={20} color="#CCC" />
-							<Text style={styles.small_text}> THURSDAY</Text>
-						</View>
-					</View>
+				<View style={styles.calendar_days}>
+					{ this.renderWeeks() }
 				</View>
+					
+				{this._renderSelectedDay()}
 
-				<View style={styles.logs}>
-					<View>
-						<Text style={styles.log_text}>Create New Entry</Text>
-						<Text style={styles.log_subtext}>On Thursday, November 14</Text>
-					</View>
-					<Button 
-						noDefaultStyles={true}
-						onPress={this.press.bind(this)}
-					>
-						<Icon name="chevron-right" size={30} color="#CCC" />
-					</Button>
-				</View>
 			</ScrollView>
 		);
 	}
@@ -351,11 +360,7 @@ const styles = StyleSheet.create({
 		fontSize: 10
 	},
 	notes: {
-		marginTop: 10,
-		padding: 20,
-		borderColor: '#F5F5F5',
-		borderTopWidth: 1,
-		borderBottomWidth: 1,
+		padding: 10,
 		flexDirection: 'row',
 		backgroundColor: '#FAFAFA'
 	},
