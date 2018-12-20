@@ -10,8 +10,6 @@ import {
 import moment from 'moment';
 import LinearGradient from 'react-native-linear-gradient';
 
-import { testData, useTestData } from '../helpers/TestData';
-
 // https://github.com/tutsplus/create-common-app-layouts-in-react-native
 
 // https://networksynapse.net/quick-introduction-to-react-natives-calendar-events/
@@ -24,6 +22,7 @@ import { range } from 'lodash';
 import Button from '../components/Button';
 import Day from '../components/Day';
 import DayDetails from '../components/DayDetails';
+import API from '../helpers/API';
 
 export default class Calendar extends Component {
 
@@ -33,7 +32,6 @@ export default class Calendar extends Component {
 		this.fetchEvents = this.fetchEvents.bind(this);
 		this.refreshCalendars = this.refreshCalendars.bind(this);
 		this._onDayPress = this._onDayPress.bind(this);
-		this.getEventsForDate = this.getEventsForDate.bind(this);
 		
 		var date = new Date();
 		this.state = {
@@ -42,19 +40,12 @@ export default class Calendar extends Component {
 	      year: date.getFullYear(),	// selected month
 		  month: date.getMonth(),	// selected year
 		  selectedDate: moment(), // today!
+		  forceUpdateDays: moment(),
 	    }
-
-
-	    //this.fetchEvents();
-	    /*
-	    // refresh the calanders
-	    // get all events for this month
-	    this.refreshCalendars(() => { 
-	    	this.fetchEvents() 
-	    });*/
 	}
 
 	componentWillMount () {
+		API.init();
 		this.fetchEvents(); // fetch events for the current month
 	}
 
@@ -83,51 +74,15 @@ export default class Calendar extends Component {
 		return weeks_r;
 	}
 
-	getEventsForDate(momentDate) {
-
-		var results = [];
-		const dateStr = momentDate.format("YY-MM-DD");
-
-		for (let i = 0; i < this.state.events.length; ++i) {
-			//console.log("EVENT----------");
-			let event = this.state.events[i];
-			console.log(event);
-			var startDate = event.startDate;
-			var endDate = event.endDate;
-
-			if (momentDate.isBetween(startDate, endDate)) {
-				//console.log("we found an event that spans multiple days, of which " + dateStr + " is inside this range");
-				results.push(event);
-			}
-			else if (momentDate.isSame(startDate, 'day')) {
-				//console.log("we found an event that is on " + dateStr);
-				results.push(event);
-			}
-
-			//console.log("----------");
-		}
-
-		return results;
-	}
-
 	_onDayPress(day) {
 		console.log("day pressed!");
-
-
-		/*
-		day.setSelected(true);
-		if (this.state.selectedDay) {
-			this.state.selectedDay.setSelected(false);
-		}*/
-		//this.setState({selectedDate: day.props.date});
 		this._dayDetails.setDate(day.props.date);
 	}
 
 	renderDays(weekDays) {
 		return weekDays.map((date, index) => {
-			var events = this.getEventsForDate(date);
 			return (
-				<Day key={date.toISOString()} events={events} date={date} monthStartDate={this.startDate}
+				<Day key={this.state.forceUpdateDays.toISOString() + date.toISOString()} date={date} monthStartDate={this.startDate}
 					onPress={this._onDayPress}/>
 			);
 		});
@@ -188,79 +143,19 @@ export default class Calendar extends Component {
 		this.startDate.add(this.startDate.daysInMonth() - 1, 'days')
 	}
 
-  	fetchEvents(fn = null) {
+  	fetchEvents() {
 
-  		console.log("year: " + this.state.year + " month: " + this.state.month);
+		API.fetchEvents(API.computeStartAndEndOfMonth(this.state.year, this.state.month)).then((events) => {
+			console.log("events fetched");
+			this.setState({forceUpdateDays: moment()});
+		});
 
-  		moment.locale('en');
-    	var dt = '2016-05-02T00:00:00';
-
-    	const startDate = moment([this.state.year, this.state.month, 1]).toISOString();
-
-    	// get the number of days for this month
-		const daysInMonth = moment(startDate).daysInMonth();
-		console.log("Days in month:" + daysInMonth);
-
-		// we are adding the days in this month to the start date (minus the first day)
-		const endDate = moment(startDate).add(daysInMonth - 1, 'days').toISOString();
-
-    	console.log(moment([this.state.year, this.state.month, 1]).format('MMM'));
-    	console.log("Start Date:" + startDate);
-    	console.log("End Date:" + endDate);
-
-		if (useTestData == true) {
-			this.setState({events: testData.events});
-		}
-		else {
-			// if calendars is null, it will assume ALL calendars - 3rd arg , /*this.state.calendars* / null
-			RNCalendarEvents.fetchAllEvents(startDate, endDate).then(events => {
-				console.log("Found events: " + events.length);
-				//console.log(events);
-				this.setState({events: events});
-				/*
-				if (fn != null) {
-					fn();
-				}*/
-		  	}).catch(error => console.log('Fetch Events Error: ', error));
-		}
 	  }
-	  /*
-	  _renderSelectedDay() {
-		let selectedDate = this.state.selectedDate;
-		var eventElements = [];
-		if (selectedDate) {
-			let events = this.getEventsForDate(selectedDate);
-			for (let i = 0; i < events.length; ++i) {
-				var event = events[i];
-				eventElements.push(
-					<Text key={i} style={[styles.notes_text, {color: event.calendar.color}]}>
-						{event.title}
-					</Text>
-					);
-			}
-		}
-
-		  return (
-			<View style={styles.notes}>	
-					<View style={styles.notes_notes}>
-						{eventElements}
-					</View>
-					<View style={[styles.notes_selected_date]}>
-						<Text style={styles.big_text}>{selectedDate.date()}</Text>
-						<View style={styles.inline}>
-							<Text style={styles.small_text}> {selectedDate.format('dddd').toUpperCase()}</Text>
-						</View>
-					</View>
-				</View>
-		  );
-	  }
-*/
-
+	 
 	render() {
 		console.log("Calander Render");
 		const monthName = moment([this.state.year, this.state.month, 1]).format('MMM');
 
-		// TODO: move getEvent ... to its own class and pass that around
 		return (
 			<ScrollView style={styles.container}>
 				
@@ -271,7 +166,7 @@ export default class Calendar extends Component {
 					{ this.renderWeeks() }
 				</View>
 					
-				<DayDetails ref={r => this._dayDetails = r} getEventsForDate={this.getEventsForDate}/>
+				<DayDetails ref={r => this._dayDetails = r}/>
 
 			</ScrollView>
 		);

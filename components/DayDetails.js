@@ -7,6 +7,8 @@ import {
   View
 } from 'react-native';
 import moment from 'moment';
+import API from '../helpers/API';
+import { EventRegister } from 'react-native-event-listeners'
 
 export default class DayDetails extends Component {
 	
@@ -24,6 +26,17 @@ export default class DayDetails extends Component {
 		this.setDate = this.setDate.bind(this);
 	}
 
+	componentWillMount() {
+        var self = this;
+        this._eventsChanged = EventRegister.addEventListener(API.EVENTS_CHANGED, (data) => {
+            self.setState({events: API.getEventsForDate(self.state.date)});
+        });
+    }
+
+    componentWillUnmount() {
+        EventRegister.removeEventListener(this._eventsChanged)
+    }
+
 	setDate(date) {
 		this.setState({date});
 	}
@@ -34,7 +47,7 @@ export default class DayDetails extends Component {
 		let selectedDate = this.state.date;
 		var eventElements = [];
 		if (selectedDate) {
-			let events = this.props.getEventsForDate(selectedDate);
+			let events = API.getEventsForDate(selectedDate);
 			for (let i = 0; i < events.length; ++i) {
 				let event = events[i];
 				let startDate = moment(event.startDate);

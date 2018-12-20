@@ -13,6 +13,8 @@ import {
 } from 'react-native'
 import moment from 'moment';
 import Button from './Button'
+import API from '../helpers/API';
+import { EventRegister } from 'react-native-event-listeners'
 
 export default class Day extends Component {
 
@@ -56,7 +58,19 @@ export default class Day extends Component {
         this.state = {
             tense: tense,
             selected: false,
+            events: API.getEventsForDate(this.props.date),
         };
+    }
+
+    componentWillMount() {
+        var self = this;
+        this._eventsChanged = EventRegister.addEventListener(API.EVENTS_CHANGED, (data) => {
+            self.setState({events: API.getEventsForDate(self.props.date)});
+        });
+    }
+
+    componentWillUnmount() {
+        EventRegister.removeEventListener(this._eventsChanged)
     }
 
     setSelected(selected) {
@@ -88,17 +102,17 @@ export default class Day extends Component {
         // change number of lines based on number of events
         // ideally I want to measure the text size to fit as much as possible
         let numberOfLines = 10;
-        if (this.props.events.length >= 5)
+        if (this.state.events.length >= 5)
             numberOfLines = 1;
-        else if (this.props.events.length >= 3)
+        else if (this.state.events.length >= 3)
             numberOfLines = 2;
-        else if (this.props.events.length >= 2)
+        else if (this.state.events.length >= 2)
             numberOfLines = 3;
 
         let eventTextStyle = this.tenseOptions[this.state.tense].eventTextStyle;
         var eventElements = [];
-        for (let i = 0; i < this.props.events.length; ++i) {
-            var event = this.props.events[i];
+        for (let i = 0; i < this.state.events.length; ++i) {
+            var event = this.state.events[i];
             eventElements.push(
                 <Text key={i} style={[eventTextStyle, {color: event.calendar.color}]} 
                     numberOfLines={numberOfLines} ellipsizeMode={'clip'}>
