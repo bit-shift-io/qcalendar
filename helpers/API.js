@@ -109,6 +109,30 @@ class API {
 
 		return results;
     }
+
+    async saveEvent(event) {
+        console.log("AddEvent called");
+        console.log(event);
+
+        return RNCalendarEvents.saveEvent(event.title, {
+          location:'Our Awesome Place City, State',
+          notes: 'Calander Notes',
+          description: 'Calander Description',
+          startDate: event.startDate,
+          endDate: event.endDate,
+          calendar: ['Calendar'],
+          alarm: [{
+            date:-1
+          }],
+        })
+        .then(id => {
+          console.log("Saved calander event: " + id + " on: " + event.startDate.toISOString());
+    
+          // we can get the event ID here if we need it
+          //Linking.URL(`cal:${firstTime.getTime()}`);
+          return id;
+        }).catch(error => console.log('Save Event Error: ', error));
+      }
 }
 
 // remember to make it singleton when export (with new keyword)

@@ -9,6 +9,8 @@ import {
 import moment from 'moment';
 import API from '../helpers/API';
 import { EventRegister } from 'react-native-event-listeners'
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import Button from './Button'
 
 export default class DayDetails extends Component {
 	
@@ -74,7 +76,12 @@ export default class DayDetails extends Component {
 						<View style={styles.inline}>
 							<Text style={styles.small_text}> {selectedDate.format('dddd').toUpperCase()}</Text>
 						</View>
+
+						<Button onPress={this.props.parent._onNewEventPress}>
+							<Icon name='event' size={30} color='#000000' />
+						</Button>
 					</View>
+
 				</View>
 		  );
 	}

@@ -9,6 +9,7 @@ import {
 
 import moment from 'moment';
 import LinearGradient from 'react-native-linear-gradient';
+import EditEvent from '../pages/EditEvent'
 
 // https://github.com/tutsplus/create-common-app-layouts-in-react-native
 
@@ -32,6 +33,7 @@ export default class Calendar extends Component {
 		this.fetchEvents = this.fetchEvents.bind(this);
 		this.refreshCalendars = this.refreshCalendars.bind(this);
 		this._onDayPress = this._onDayPress.bind(this);
+		this._onNewEventPress = this._onNewEventPress.bind(this);
 		
 		var date = new Date();
 		this.state = {
@@ -41,6 +43,7 @@ export default class Calendar extends Component {
 		  month: date.getMonth(),	// selected year
 		  selectedDate: moment(), // today!
 		  forceUpdateDays: moment(),
+		  newEventPageVisible: false,
 	    }
 	}
 
@@ -151,13 +154,36 @@ export default class Calendar extends Component {
 		});
 
 	  }
+
+	
+	_onNewEventPress() {
+		var self = this;
+		this.setState({newEventPageVisible: !this.state.newEventPageVisible}, () => {
+			if (this._scrollView) {
+				setTimeout(() => {
+					self._scrollView.scrollToEnd({animated: true});
+				}, 100);
+			}
+		});
+	}
+	
+	_renderNewEventPage() {
+		if (!this.state.newEventPageVisible) {
+			return (null);
+		}
+
+		return (
+			<EditEvent parent={this}/>
+		);
+	}
+
 	 
 	render() {
 		console.log("Calander Render");
 		const monthName = moment([this.state.year, this.state.month, 1]).format('MMM');
 
 		return (
-			<ScrollView style={styles.container}>
+			<ScrollView style={styles.container} ref={r => this._scrollView = r}>
 				
 				<View style={styles.calendar_weekdays}>
 					{ this.renderWeekDays() }
@@ -166,7 +192,9 @@ export default class Calendar extends Component {
 					{ this.renderWeeks() }
 				</View>
 					
-				<DayDetails ref={r => this._dayDetails = r}/>
+				<DayDetails ref={r => this._dayDetails = r} parent={this}/>
+
+				{this._renderNewEventPage()}
 
 			</ScrollView>
 		);

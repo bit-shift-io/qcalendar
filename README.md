@@ -35,6 +35,7 @@ lodash
 react-native-vector-icons
 react-native-linear-gradient
 moment
+https://www.npmjs.com/package/react-native-modal-datetime-picker
 
 
 useful command lines for react:

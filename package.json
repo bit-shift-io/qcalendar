@@ -15,6 +15,7 @@
     "react-native-calendar-events": "^1.6.3",
     "react-native-event-listeners": "^1.0.3",
     "react-native-linear-gradient": "^2.5.3",
+    "react-native-modal-datetime-picker": "^6.0.0",
     "react-native-vector-icons": "^6.1.0"
   },
   "devDependencies": {
