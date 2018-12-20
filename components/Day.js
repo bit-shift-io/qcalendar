@@ -80,6 +80,8 @@ export default class Day extends Component {
     }
 
     render() {
+        console.log("Day Render");
+        
         //const dateStr = this.state.date.format("YY-MM-DD");
         let date = this.props.date.date();
 

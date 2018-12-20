@@ -23,15 +23,17 @@ import { range } from 'lodash';
 
 import Button from '../components/Button';
 import Day from '../components/Day';
+import DayDetails from '../components/DayDetails';
 
 export default class Calendar extends Component {
-	
+
 	constructor(props) {
 		super(props);
 
 		this.fetchEvents = this.fetchEvents.bind(this);
 		this.refreshCalendars = this.refreshCalendars.bind(this);
 		this._onDayPress = this._onDayPress.bind(this);
+		this.getEventsForDate = this.getEventsForDate.bind(this);
 		
 		var date = new Date();
 		this.state = {
@@ -110,12 +112,15 @@ export default class Calendar extends Component {
 
 	_onDayPress(day) {
 		console.log("day pressed!");
+
+
 		/*
 		day.setSelected(true);
 		if (this.state.selectedDay) {
 			this.state.selectedDay.setSelected(false);
 		}*/
-		this.setState({selectedDate: day.props.date});
+		//this.setState({selectedDate: day.props.date});
+		this._dayDetails.setDate(day.props.date);
 	}
 
 	renderDays(weekDays) {
@@ -210,7 +215,7 @@ export default class Calendar extends Component {
 			// if calendars is null, it will assume ALL calendars - 3rd arg , /*this.state.calendars* / null
 			RNCalendarEvents.fetchAllEvents(startDate, endDate).then(events => {
 				console.log("Found events: " + events.length);
-				console.log(events);
+				//console.log(events);
 				this.setState({events: events});
 				/*
 				if (fn != null) {
@@ -219,7 +224,7 @@ export default class Calendar extends Component {
 		  	}).catch(error => console.log('Fetch Events Error: ', error));
 		}
 	  }
-	  
+	  /*
 	  _renderSelectedDay() {
 		let selectedDate = this.state.selectedDate;
 		var eventElements = [];
@@ -249,10 +254,13 @@ export default class Calendar extends Component {
 				</View>
 		  );
 	  }
+*/
 
 	render() {
+		console.log("Calander Render");
 		const monthName = moment([this.state.year, this.state.month, 1]).format('MMM');
 
+		// TODO: move getEvent ... to its own class and pass that around
 		return (
 			<ScrollView style={styles.container}>
 				
@@ -263,7 +271,7 @@ export default class Calendar extends Component {
 					{ this.renderWeeks() }
 				</View>
 					
-				{this._renderSelectedDay()}
+				<DayDetails ref={r => this._dayDetails = r} getEventsForDate={this.getEventsForDate}/>
 
 			</ScrollView>
 		);
@@ -279,46 +287,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1
 	},
-	header: {
-		backgroundColor: '#329BCB',
-		flexDirection: 'row',
-		padding: 20
-	},
-	header_item: {
-		flex: 1
-	},
-	header_button: {
-		flexDirection: 'row'
-	},
-	text_center: {
-		textAlign: 'center'
-	},
-	text_right: {
-		textAlign: 'right'
-	},
-	header_text: {
-		color: '#fff',
-		fontSize: 20
-	},
-	bold_text: {
-		fontWeight: 'bold'
-	},
-	calendar_header: {
-		flexDirection: 'row'
-	},
-	calendar_header_item: {
-		flex: 1,
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		paddingTop: 20,
-		paddingRight: 40,
-		paddingLeft: 40
-	},
-	calendar_header_text: {
-		fontWeight: 'bold',
-		fontSize: 20
-	},
+	
 	calendar_weekdays: {
 		flexDirection: 'row',
 		paddingTop: 10
@@ -331,72 +300,4 @@ const styles = StyleSheet.create({
 	week_days: {
 		flexDirection: 'row'
 	},
-	day: {
-		flex: 1,
-		backgroundColor: '#F5F5F5',
-		padding: 2,
-		margin: 2
-	},
-	today: {
-		flex: 1,
-		backgroundColor: '#F5F5F5',
-		padding: 2,
-		margin: 2
-	},
-
-	day_text: {
-		textAlign: 'center',
-		color: '#A9A9A9',
-		fontSize: 25
-	},
-	tiny_text: {
-		textAlign: 'center',
-		color: '#A9A9A9',
-		fontSize: 10
-	},
-	tiny_text_left: {
-		textAlign: 'left',
-		color: '#A9A9A9',
-		fontSize: 10
-	},
-	notes: {
-		padding: 10,
-		flexDirection: 'row',
-		backgroundColor: '#FAFAFA'
-	},
-	notes_notes: {
-		flex: 3
-	},
-	notes_text: {
-		fontSize: 18
-	},
-	notes_selected_date: {
-		flex: 1,
-		alignItems: 'flex-end',
-		flexDirection: 'column'
-	},
-	small_text: {
-		fontSize: 15
-	},
-	big_text: {
-		fontSize: 50,
-		fontWeight: 'bold'
-	},
-	inline: {
-		flexDirection: 'row'
-	},
-	logs: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		padding: 20,
-		borderColor: '#F5F5F5',
-		borderBottomWidth: 1
-	},
-	log_text: {
-		fontSize: 25
-	},
-	log_subtext: {
-		fontSize: 18
-	}
 });
