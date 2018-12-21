@@ -15,6 +15,7 @@ import moment from 'moment';
 import Button from './Button'
 import API from '../helpers/API';
 import { EventRegister } from 'react-native-event-listeners'
+import Log from '../helpers/Log'
 
 export default class Day extends Component {
 
@@ -46,7 +47,7 @@ export default class Day extends Component {
         this._onPress = this._onPress.bind(this);
         this.setSelected = this.setSelected.bind(this);
 
-        const today = moment();
+        const today = moment.utc();
         let tense = 'past'; // isBefore
         if (this.props.date.isSame(today, 'day'))
             tense = 'today';
@@ -94,7 +95,7 @@ export default class Day extends Component {
     }
 
     render() {
-        console.log("Day Render");
+        Log.debug(Log.RENDER, "Day Render");
         
         //const dateStr = this.state.date.format("YY-MM-DD");
         let date = this.props.date.date();

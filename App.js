@@ -27,8 +27,6 @@ export default class App extends Component<Props> {
 
   constructor(props) {
     super(props);
-    this._onPressButton = this._onPressButton.bind(this);
-    this.addEvent = this.addEvent.bind(this);
 
     this.state = {
       cal_auth: ''
@@ -36,6 +34,8 @@ export default class App extends Component<Props> {
   }
 
   componentWillMount () {
+
+    // TODO: move the API.init
     RNCalendarEvents.authorizationStatus()
          .then(status => {
             console.log("Calander auth status: " + status);
@@ -66,84 +66,12 @@ export default class App extends Component<Props> {
     .catch(error => console.warn('Auth Error: ', error));*/
   }
 
-  listCalanders() {
-    RNCalendarEvents.findCalendars().then(calanders =>{
-      console.log("Found calanders:");
-      console.log(calanders);
-    }).catch(error => console.log('Find Calanders Error: ', error));
-  }
-
-  addEvent() {
-    console.log("AddEvent called");
-    var firstTime = new Date('05 January 2019 14:48 UTC');
-    var lastTime = new Date('05 January 2019 15:48 UTC');
-
-    RNCalendarEvents.saveEvent('Example Event', {
-      location:'Our Awesome Place City, State',
-      notes: 'Calander Notes',
-      description: 'Calander Description',
-      startDate: firstTime.toISOString(),
-      endDate: lastTime.toISOString(),
-      calendar: ['Calendar'],
-      alarm: [{
-        date:-1
-      }],
-    })
-    .then(id => {
-      console.log("Saved calander event: " + id + " on: " + firstTime.toISOString());
-
-      // we can get the event ID here if we need it
-      //Linking.URL(`cal:${firstTime.getTime()}`);
-    }).catch(error => console.log('Save Event Error: ', error));
-  }
-
-  _onPressButton() {
-    //Alert.alert('You tapped the button!');
-    this.addEvent();
-  }
-
   render() {
     return (
       <Calendar app={this} />
       );
   }
-
-  render_old() {
-    return (
-      <View style={styles.container}>
-
-        <Calendar />
-
-        <Button
-            onPress={this._onPressButton}
-            title="Save Test Event"
-            color="#841584"
-          />
-        <Button
-            onPress={this.listCalanders}
-            title="List Calanders"
-            color="#841584"
-          />
-      </View>
-    );
-  }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
 });

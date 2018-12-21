@@ -11,6 +11,7 @@ import API from '../helpers/API';
 import { EventRegister } from 'react-native-event-listeners'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Button from './Button'
+import Log from '../helpers/Log'
 
 export default class DayDetails extends Component {
 	
@@ -19,7 +20,7 @@ export default class DayDetails extends Component {
 	}
 
 	state = {
-		date: moment(),
+		date: moment.utc(),
 		events: [],
 	}
 
@@ -43,8 +44,13 @@ export default class DayDetails extends Component {
 		this.setState({date});
 	}
 
+	_onEventPress(event) {
+		Log.debug(Log.ONPRESS, "_onEventPress");
+		this.props.parent._onEventPress(event);
+	}
+
 	render() {
-		console.log("DayDetails Render");
+		Log.debug(Log.RENDER, "DayDetails Render");
 
 		let selectedDate = this.state.date;
 		var eventElements = [];
@@ -52,15 +58,24 @@ export default class DayDetails extends Component {
 			let events = API.getEventsForDate(selectedDate);
 			for (let i = 0; i < events.length; ++i) {
 				let event = events[i];
-				let startDate = moment(event.startDate);
+				let startDate = moment.utc(event.startDate);
+
+				let timeElement = null;
+				if (!event.allDay) {
+					timeElement =	<Text style={[styles.timeText]}>
+										| {startDate.format('hh:mm a')}
+									</Text>;
+				}
+
 				eventElements.push(
-					<View key={'dayDetailsEvent' + i} style={styles.eventContainer}>
+					<Button key={'dayDetailsEvent' + i} style={styles.eventContainer} onPress={() => this._onEventPress(event)}>
 						<View style={[styles.leftHighlight, {backgroundColor: event.calendar.color}]}>
 						</View>
 						<Text style={[styles.notes_text]}>
-							{event.title} | {startDate.format('hh:mm a')}
+							{event.title}
 						</Text>
-					</View>
+						{timeElement}
+					</Button>
 					);
 			}
 		}
@@ -105,6 +120,13 @@ const styles = StyleSheet.create({
 
 	eventContainer: {
 		paddingBottom: 2,
+		flexDirection: 'row',
+	},
+
+	timeText: {
+		fontSize: 14,
+		paddingLeft: 10,
+		color: '#C0C0C0',
 	},
 	
 	notes_text: {

@@ -24,6 +24,7 @@ import Button from '../components/Button';
 import Day from '../components/Day';
 import DayDetails from '../components/DayDetails';
 import API from '../helpers/API';
+import Log from '../helpers/Log'
 
 export default class Calendar extends Component {
 
@@ -41,14 +42,15 @@ export default class Calendar extends Component {
 	      events: [], 		// what events to display on the calander
 	      year: date.getFullYear(),	// selected month
 		  month: date.getMonth(),	// selected year
-		  selectedDate: moment(), // today!
-		  forceUpdateDays: moment(),
+		  selectedDate: moment.utc(), // today!
+		  forceUpdateDays: moment.utc(),
 		  newEventPageVisible: false,
 	    }
 	}
 
 	componentWillMount () {
 		API.init();
+		API.findCalendars();
 		this.fetchEvents(); // fetch events for the current month
 	}
 
@@ -56,7 +58,7 @@ export default class Calendar extends Component {
 		let weekdays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 		return weekdays.map((day) => {
 			return (
-				<Text key={day} style={styles.calendar_weekdays_text}>{day.toUpperCase()}</Text>
+				<Text key={'weekday' + day} style={styles.calendar_weekdays_text}>{day.toUpperCase()}</Text>
 			);
 		});
 	}
@@ -78,14 +80,17 @@ export default class Calendar extends Component {
 	}
 
 	_onDayPress(day) {
-		console.log("day pressed!");
+		Log.debug(API.ONPRESS, "day pressed:" + day.props.date.toISOString());
 		this._dayDetails.setDate(day.props.date);
+		if (this._editEvent) {
+			this._editEvent.setDate(day.props.date);
+		}
 	}
 
 	renderDays(weekDays) {
 		return weekDays.map((date, index) => {
 			return (
-				<Day key={this.state.forceUpdateDays.toISOString() + date.toISOString()} date={date} monthStartDate={this.startDate}
+				<Day key={'day' + index} date={date} monthStartDate={this.startDate}
 					onPress={this._onDayPress}/>
 			);
 		});
@@ -103,16 +108,16 @@ export default class Calendar extends Component {
 
 		let lastMonth = this.startDate.subtract(1, 'months');
 		let pastMonthDates = pastMonthDays.map((item, index) => {
-			return moment([lastMonth.year(), lastMonth.month(), item]);
+			return moment.utc([lastMonth.year(), lastMonth.month(), item]);
 		});
 
 		let thisMonthDates = thisMonthDays.map((item, index) => {
-			return moment([this.state.year, this.state.month, item]);
+			return moment.utc([this.state.year, this.state.month, item]);
 		});
 
 		let nextMonth = this.startDate.add(1, 'months');
 		let nextMonthDates = nextMonthDays.map((item, index) => {
-			return moment([nextMonth.year(), nextMonth.month(), item]);
+			return moment.utc([nextMonth.year(), nextMonth.month(), item]);
 		});
 
 		let dates = pastMonthDates.concat(thisMonthDates, nextMonthDates);
@@ -120,7 +125,7 @@ export default class Calendar extends Component {
 
 		return groupedDates.map((weekDays, index) => {
 			return (
-				<View key={index} style={styles.week_days}>
+				<View key={'weekview' + index} style={styles.week_days}>
 					{ this.renderDays(weekDays) }				
 				</View>
 			);
@@ -139,7 +144,7 @@ export default class Calendar extends Component {
   	}
 
 	get startDate() {
-		return moment([this.state.year, this.state.month, 1]);
+		return moment.utc([this.state.year, this.state.month, 1]);
 	}
 
 	get endDate() {
@@ -148,9 +153,10 @@ export default class Calendar extends Component {
 
   	fetchEvents() {
 
+
 		API.fetchEvents(API.computeStartAndEndOfMonth(this.state.year, this.state.month)).then((events) => {
 			console.log("events fetched");
-			this.setState({forceUpdateDays: moment()});
+			this.setState({forceUpdateDays: moment.utc()});
 		});
 
 	  }
@@ -166,6 +172,21 @@ export default class Calendar extends Component {
 			}
 		});
 	}
+
+	// when the user presses an event on the DayDetails
+	_onEventPress(event) {
+		var self = this;
+		this.setState({newEventPageVisible: true}, () => {
+			if (this._scrollView) {
+				setTimeout(() => {
+					if (this._editEvent)
+						this._editEvent.editEvent(event);
+
+					self._scrollView.scrollToEnd({animated: true});
+				}, 100);
+			}
+		});
+	}
 	
 	_renderNewEventPage() {
 		if (!this.state.newEventPageVisible) {
@@ -173,14 +194,14 @@ export default class Calendar extends Component {
 		}
 
 		return (
-			<EditEvent parent={this}/>
+			<EditEvent parent={this} ref={r => this._editEvent = r} date={this._dayDetails.state.date}/>
 		);
 	}
 
 	 
 	render() {
-		console.log("Calander Render");
-		const monthName = moment([this.state.year, this.state.month, 1]).format('MMM');
+		Log.debug(Log.RENDER, "Calander Render");
+		const monthName = moment.utc([this.state.year, this.state.month, 1]).format('MMM');
 
 		return (
 			<ScrollView style={styles.container} ref={r => this._scrollView = r}>
