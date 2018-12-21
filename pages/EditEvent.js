@@ -79,14 +79,18 @@ export default class EditEvent extends Component {
 
     _onStartDateTimePickerConfirm(date) {
         console.log('A date has been picked: ', date);
-        // TODO: make sure end date is at least equal/ infront of startDate
-        this.setState({startDateModified: true, startDateTimePickerVisible: false, startDate: moment.utc(date)});
 
-        // change end date to follow the start date, unless the user 
-        // has specified an end date
-        if (!this.state.endDateModified) {
-            this.setState({endDate: moment.utc(date)});
+        let endDate = this.state.endDateModified ? this.state.endDate : moment.utc(date);
+        let startDate = moment.utc(date);
+
+        // swap start and end date if range is bad
+        if (endDate.isBefore(startDate)) {
+            let temp = endDate;
+            endDate = startDate;
+            startDate = temp;
         }
+
+        this.setState({startDateModified: true, startDateTimePickerVisible: false, startDate: startDate, endDate: endDate});
     }
 
     _onStartDateTimePickerCancel() {
@@ -100,22 +104,31 @@ export default class EditEvent extends Component {
 
     _onEndDateTimePickerConfirm(date) {
         console.log('A date has been picked: ', date);
-        this.setState({endDateModified: true, endDateTimePickerVisible: false, endDate: moment.utc(date)});
+
+        let endDate = moment.utc(date);
+        let startDate = this.state.startDate;
+
+        // swap start and end date if range is bad
+        if (endDate.isBefore(startDate)) {
+            let temp = endDate;
+            endDate = startDate;
+            startDate = temp;
+        }
+        this.setState({endDateModified: true, endDateTimePickerVisible: false, endDate: endDate, startDate: startDate});
     }
 
     _onEndDateTimePickerCancel() {
         this.setState({endDateTimePickerVisible: false});
     }
 
+    /*
     _isDateRangeOk() {
         return this.state.endDate.isSameOrAfter(this.state.startDate);
-    }
-
+    }*/
 
     _onNewEventConfirm() {
-        // validate form, buisness calander bypasses this by giving you
-        // a range picker that doesnt let it srhink below 1 day! 
-        if (!this._isDateRangeOk()) {
+        // validate form
+        if (!this.state.event.title || this.state.event.title == '') {
             return;
         }
 
@@ -202,7 +215,7 @@ export default class EditEvent extends Component {
 	render() {
         Log.debug(Log.RENDER, "EditEvent Render");
         
-        let dateRangeOk = this._isDateRangeOk();
+        //let dateRangeOk = this._isDateRangeOk();
 
         return (
 			<View style={styles.viewContainer}>	
@@ -229,7 +242,7 @@ export default class EditEvent extends Component {
                         />
 
                     <Button onPress={this._onShowEndDateTimePicker} 
-                        style={[styles.formField, {backgroundColor: dateRangeOk ? styles.formField.backgroundColor : 'red'}]}>
+                        style={[styles.formField]}>
                         <Text>{this.state.endDate.format("MMM DD, YYYY")}</Text>
                     </Button>
                     <DateTimePicker

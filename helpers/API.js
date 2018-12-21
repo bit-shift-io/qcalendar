@@ -153,22 +153,29 @@ class API {
       }
 
     async saveEvent(event) {
-        Log.debug(Log.API, "saveEvent called");
+        Log.debug(Log.API, "saveEvent called: " + JSON.stringify(event));
 
         var self = this;
         var event = event;
-        return RNCalendarEvents.saveEvent(event.title, {
-            id: event.id,
-            location: event.location,
-            notes: 'Added via QCalendar',
-            description: event.description,
-            startDate: event.startDate,
-            endDate: event.endDate,
-            calendarId: event.calendar.id,
-            alarm: event.alarm,
-            allDay: event.allDay,
-        })
-        .then(id => {
+
+        // optionally include the id field if it is not null
+        var sEvent = Object.assign(event.id ? {
+                id: event.id
+            } : {}, 
+            {
+                location: event.location,
+                notes: 'Added via QCalendar',
+                description: event.description,
+                startDate: event.startDate,
+                endDate: event.endDate,
+                calendarId: event.calendar.id,
+                alarm: event.alarm,
+                allDay: event.allDay,
+            });
+        
+        return RNCalendarEvents.saveEvent(event.title, sEvent).then(id => {
+            Log.debug(Log.API, "saveEvent complete: " + id);
+
             // search and replace the existing event
             if (event.id != null) {
                 self.events = self.events.map(function(item) {
@@ -190,7 +197,9 @@ class API {
             AsyncStorage.setItem('@API:events', JSON.stringify(self.events));
 
             return id;
-        }).catch(error => console.log('Save Event Error: ', error));
+        }).catch(error => {
+            console.error(error);
+        });
     }
 
     async removeEvent(eventId) {

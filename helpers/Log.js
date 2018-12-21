@@ -26,7 +26,7 @@ class Log {
         if (this.channelsToIgnore.indexOf(channel) >= 0)
             return;
 
-        console.log(args);
+        console.log("[" + channel + "] " + args);
     }
 }
 
