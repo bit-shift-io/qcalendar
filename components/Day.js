@@ -17,6 +17,7 @@ import API from '../helpers/API';
 import { EventRegister } from 'react-native-event-listeners'
 import Log from '../helpers/Log'
 import Theme from '../helpers/Theme';
+import Rect from '../helpers/Rect'
 
 export default class Day extends Component {
 
@@ -47,6 +48,8 @@ export default class Day extends Component {
         super(props)
         this._onPress = this._onPress.bind(this);
         this.setSelected = this.setSelected.bind(this);
+        this.isDropArea = this.isDropArea.bind(this);
+        this._onLayout = this._onLayout.bind(this);
 
         const today = moment.utc();
         let tense = 'past'; // isBefore
@@ -71,8 +74,32 @@ export default class Day extends Component {
         });
     }
 
+    _onLayout(e, ref) {
+        Log.debug('day', '_onLayout');
+        let self = this;
+        ref.measure(
+            function(
+                x,
+                y,
+                width,
+                height,
+                pageX,
+                pageY
+              ) {
+                  //Log.debug('day', "MEASURE: x:" + x + ' y:' + y + ' width:' + width + ' height:' + height + ' pageX:' + pageX + ' pageY:' + pageY);
+                  //self.setState({productListContainerHeight: height});
+                  self._dimensions = new Rect(pageX, pageY, width, height);
+              }
+            );
+    }
+
     componentWillUnmount() {
         EventRegister.removeEventListener(this._eventsChanged)
+    }
+
+    isDropArea({x, y}) {
+        Log.debug('day', 'isDropArea');
+        return this._dimensions.isPointInside(x, y);
     }
 
     setSelected(selected) {
@@ -133,6 +160,8 @@ export default class Day extends Component {
 
         return (
             <Button 
+                onLayout={this._onLayout}
+                ref={r => this._button = r}
                 onPress={this._onPress} 
                 touchableStyle={{flex: 1}}
                 viewStyle={[styles.viewContainer, viewStyle]} >	

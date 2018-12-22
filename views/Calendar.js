@@ -46,7 +46,9 @@ export default class Calendar extends Component {
 		  selectedDate: moment.utc(), // today!
 		  forceUpdateDays: moment.utc(),
 		  newEventPageVisible: false,
-	    }
+		}
+		
+		this._days = [];
 	}
 
 	componentWillMount () {
@@ -62,6 +64,31 @@ export default class Calendar extends Component {
 				<Text key={'weekday' + day} style={styles.calendar_weekdays_text}>{day.toUpperCase()}</Text>
 			);
 		});
+	}
+
+	onEventDrop({draggable, x, y, event}) {
+		Log.debug('calander', 'onEventDrop');
+
+		for (let i = 0; i < this._days.length; ++i) {
+			let day = this._days[i];
+			if (day && day.isDropArea({x, y})) {
+
+				// TODO: move the event from where it was to the selected day
+				// and trigger DayDetails to re-render
+				Log.debug('Calander', 'Move event: ' + event.id + ' from: ' + event.startDate + ' to:' + day.props.date.toISOString());
+
+				// compute new start and end dates
+				let e = Object.assign({}, event);
+				let dif = moment.utc(event.endDate).diff(moment.utc(event.startDate));
+				e.startDate = day.props.date.toISOString();
+				e.endDate = moment.utc(day.props.date).add(dif).toISOString();
+				API.saveEvent(e);
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	getWeeksArray(days) {
@@ -88,11 +115,11 @@ export default class Calendar extends Component {
 		}
 	}
 
-	renderDays(weekDays) {
+	renderDays(weekDays, offset) {
 		return weekDays.map((date, index) => {
 			return (
 				<Day key={'day' + index} date={date} monthStartDate={this.startDate}
-					onPress={this._onDayPress}/>
+					onPress={this._onDayPress} ref={r => this._days[index + offset] = r}/>
 			);
 		});
 	}
@@ -127,7 +154,7 @@ export default class Calendar extends Component {
 		return groupedDates.map((weekDays, index) => {
 			return (
 				<View key={'weekview' + index} style={styles.week_days}>
-					{ this.renderDays(weekDays) }				
+					{ this.renderDays(weekDays, index * 7) }				
 				</View>
 			);
 		});
@@ -175,7 +202,7 @@ export default class Calendar extends Component {
 	}
 
 	// when the user presses an event on the DayDetails
-	_onEventPress(event) {
+	onEventPress(event) {
 		var self = this;
 		this.setState({newEventPageVisible: true}, () => {
 			if (this._scrollView) {

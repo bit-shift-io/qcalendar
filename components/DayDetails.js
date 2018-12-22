@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Button from './Button'
 import Log from '../helpers/Log'
 import Theme from '../helpers/Theme'
+import Draggable from '../components/Draggable'
 
 export default class DayDetails extends Component {
 	
@@ -45,9 +46,14 @@ export default class DayDetails extends Component {
 		this.setState({date});
 	}
 
+	_onEventDrop(params, event) {
+		Log.debug(Log.ONPRESS, "_onEventDrop");
+		return this.props.parent.onEventDrop({...params, event});
+	}
+
 	_onEventPress(event) {
 		Log.debug(Log.ONPRESS, "_onEventPress");
-		this.props.parent._onEventPress(event);
+		this.props.parent.onEventPress(event);
 	}
 
 	render() {
@@ -69,14 +75,16 @@ export default class DayDetails extends Component {
 				}
 
 				eventElements.push(
-					<Button key={'dayDetailsEvent' + i} viewStyle={styles.eventContainer} onPress={() => this._onEventPress(event)}>
-						<View style={[styles.leftHighlight, {backgroundColor: event.calendar.color}]}>
-						</View>
-						<Text style={[styles.notes_text]}>
-							{event.title}
-						</Text>
-						{timeElement}
-					</Button>
+					<Draggable key={'dayDetailsEvent' + i} onDrop={(params) => this._onEventDrop(params, event)}>
+						<Button viewStyle={styles.eventContainer} onPress={() => this._onEventPress(event)}>
+							<View style={[styles.leftHighlight, {backgroundColor: event.calendar.color}]}>
+							</View>
+							<Text style={[styles.notes_text]}>
+								{event.title}
+							</Text>
+							{timeElement}
+						</Button>
+					</Draggable>
 					);
 			}
 		}
