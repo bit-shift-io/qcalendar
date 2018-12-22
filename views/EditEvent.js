@@ -15,6 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Button from '../components/Button'
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import Log from '../helpers/Log'
+import Theme from '../helpers/Theme'
 
 export default class EditEvent extends Component {
 	
@@ -202,12 +203,15 @@ export default class EditEvent extends Component {
     _renderDeleteButton() {
         // id is null if we are creating a new event
         // in which case we dont need a delete button!
-        if (this.state.event.id == null)
-            return null;
+        if (this.state.event.id == null) {
+            return (
+                <View style={{flex: 1}}></View>
+            );
+        }
 
         return (
-            <Button onPress={this._onDeleteEventPress}>
-                <Icon name='delete' size={30} color='#000000' />
+            <Button onPress={this._onDeleteEventPress} touchableStyle={{flex: 1}} viewStyle={styles.button}>
+                <Icon name='delete' size={30} color={Theme.textColor} />
             </Button>
         );
     }
@@ -217,66 +221,77 @@ export default class EditEvent extends Component {
         
         //let dateRangeOk = this._isDateRangeOk();
 
+        let title = this.state.event.id == null ? 'NEW EVENT' : 'EDIT EVENT';
+
         return (
 			<View style={styles.viewContainer}>	
 
-                <View style={styles.rowContainer}>
-                    <TextInput style={[{flex: 1}, styles.small_text, styles.formField]} 
-                        placeholder='Title and Time'
-                        onChangeText={(text) => this.setState({event: {...this.state.event, title: text}})} 
-                        value={this.state.event.title}/>
+                <View style={[styles.rowContainer, styles.titleRow]}>
+                    <Text style={styles.titleText}>{title}</Text>
                 </View>
 
-                <View style={styles.rowContainer}>
-                    <Icon name='date-range' size={30} color='#000000' />
+                <View style={styles.innerContainer}>
 
-                    <Button onPress={this._onShowStartDateTimePicker} 
-                        style={[styles.formField]}>
-                        <Text>{this.state.startDate.format("MMM DD, YYYY")}</Text>
-                    </Button>
-                    <DateTimePicker
-                        isVisible={this.state.startDateTimePickerVisible}
-                        onConfirm={this._onStartDateTimePickerConfirm}
-                        onCancel={this._onStartDateTimePickerCancel}
-                        date={this.state.startDate.toDate()}
-                        />
+                    <View style={styles.rowContainer}>
+                        <TextInput style={[{flex: 1}, styles.small_text, styles.formField]} 
+                            placeholder='Title and Time'
+                            onChangeText={(text) => this.setState({event: {...this.state.event, title: text}})} 
+                            value={this.state.event.title}/>
+                    </View>
 
-                    <Button onPress={this._onShowEndDateTimePicker} 
-                        style={[styles.formField]}>
-                        <Text>{this.state.endDate.format("MMM DD, YYYY")}</Text>
-                    </Button>
-                    <DateTimePicker
-                        isVisible={this.state.endDateTimePickerVisible}
-                        onConfirm={this._onEndDateTimePickerConfirm}
-                        onCancel={this._onEndDateTimePickerCancel}
-                        date={this.state.endDate.toDate()}
-                        />
-                </View>
-                
+                    <View style={styles.rowContainer}>
+                        <Icon name='date-range' size={40} color={Theme.textColor} />
 
-                <View style={styles.rowContainer}>
-                    <TextInput style={[{flex: 1}, styles.small_text, styles.formField]} 
-                        placeholder='Location'
-                        onChangeText={(text) => this.setState({event: {...this.state.event, location: text}})}
-                        value={this.state.event.location}/>
-                </View>
+                        <Button onPress={this._onShowStartDateTimePicker} 
+                            touchableStyle={[{flex: 1, marginHorizontal: 10}, styles.formField, styles.dateButton]}
+                            viewStyle={{}}>
+                            <Text style={styles.small_text}>{this.state.startDate.format("MMM DD, YYYY")}</Text>
+                        </Button>
+                        <DateTimePicker
+                            isVisible={this.state.startDateTimePickerVisible}
+                            onConfirm={this._onStartDateTimePickerConfirm}
+                            onCancel={this._onStartDateTimePickerCancel}
+                            date={this.state.startDate.toDate()}
+                            />
 
-                <View style={styles.rowContainer}>
-                    <TextInput style={[{flex: 1}, styles.small_text, styles.formField]} 
-                        placeholder='Description'
-                        onChangeText={(text) => this.setState({event: {...this.state.event, description: text}})}
-                        value={this.state.event.description}/>
+                        <Button onPress={this._onShowEndDateTimePicker} 
+                            touchableStyle={[{flex: 1}, styles.formField, styles.dateButton]}
+                            viewStyle={{}}>
+                            <Text style={styles.small_text}>{this.state.endDate.format("MMM DD, YYYY")}</Text>
+                        </Button>
+                        <DateTimePicker
+                            isVisible={this.state.endDateTimePickerVisible}
+                            onConfirm={this._onEndDateTimePickerConfirm}
+                            onCancel={this._onEndDateTimePickerCancel}
+                            date={this.state.endDate.toDate()}
+                            />
+                    </View>
+                    
+
+                    <View style={styles.rowContainer}>
+                        <TextInput style={[{flex: 1}, styles.small_text, styles.formField]} 
+                            placeholder='Location'
+                            onChangeText={(text) => this.setState({event: {...this.state.event, location: text}})}
+                            value={this.state.event.location}/>
+                    </View>
+
+                    <View style={styles.rowContainer}>
+                        <TextInput style={[{flex: 1}, styles.small_text, styles.formField]} 
+                            placeholder='Description'
+                            onChangeText={(text) => this.setState({event: {...this.state.event, description: text}})}
+                            value={this.state.event.description}/>
+                    </View>
                 </View>
 				
-				<View style={styles.rowContainer}>
+				<View style={[styles.rowContainer, styles.buttonRow]}>
                     {this._renderDeleteButton()}
 
-                    <Button onPress={this.props.parent._onNewEventPress}>
-                        <Icon name='close' size={30} color='#000000' />
+                    <Button onPress={this.props.parent._onNewEventPress} touchableStyle={{flex: 1}} viewStyle={styles.button}>
+                        <Icon name='close' size={30} color={Theme.textColor} />
                     </Button>
                     
-                    <Button onPress={this._onNewEventConfirm}>
-                        <Icon name='check' size={30} color='#000000' />
+                    <Button onPress={this._onNewEventConfirm} touchableStyle={{flex: 1}} viewStyle={styles.button}>
+                        <Icon name='check' size={30} color={Theme.textColor} />
                     </Button>
                 </View>
 			</View>
@@ -286,24 +301,45 @@ export default class EditEvent extends Component {
 
 const styles = StyleSheet.create({
 
-    leftHighlight: {
-		//flex:1,
-        width: 4,
-        backgroundColor: 'red',
-        height: '100%',
-        position: 'absolute',
-		left: 0,
-		//marginBottom: 10
-		//left: -20,
-        // zIndex isnt working... so leave this for now
-        //bottom: -AppStyle.SIZE_1,
-        //zIndex: 1000,
+    dateButton: {
+        padding: 10,
+    },
+
+    button: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 10,
+    },
+
+    buttonRow: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: Theme.editEvent.buttonRowBackgroundColor,
+    },
+
+    titleText: {
+        fontSize: 20,
+        color: Theme.textColor,
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+    },
+
+    titleRow: {
+        backgroundColor: Theme.editEvent.buttonRowBackgroundColor,
+    },
+    
+    innerContainer: {
+        paddingHorizontal: 10,
+        paddingVertical: 10,
     },
     
     formField: {
-        borderBottomWidth: 2,
-        borderBottomColor: '#C0C0C0',
+        //borderBottomWidth: 2,
+        //borderBottomColor: '#C0C0C0',
         backgroundColor: '#F5FCFF',
+        marginVertical: 5,
+        paddingHorizontal: 20,
+        borderRadius: 50,
     },
 
 	eventContainer: {
@@ -321,13 +357,14 @@ const styles = StyleSheet.create({
 		flexDirection: 'column'
 	},
 	viewContainer: {
-		padding: 10,
+		//padding: 10,
 		flexDirection: 'column',
-		backgroundColor: 'white'
+		backgroundColor: Theme.editEvent.backgroundColor,
     },
     
     rowContainer: {
         flexDirection: 'row',
+        alignItems: 'center',
         //backgroundColor: 'blue'
     },
 
@@ -336,7 +373,7 @@ const styles = StyleSheet.create({
 	},
 	
 	small_text: {
-		fontSize: 15
+		fontSize: 16
 	},
 
 	big_text: {

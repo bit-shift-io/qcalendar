@@ -9,7 +9,8 @@ import {
 
 import moment from 'moment';
 import LinearGradient from 'react-native-linear-gradient';
-import EditEvent from '../pages/EditEvent'
+import EditEvent from './EditEvent'
+import Theme from '../helpers/Theme'
 
 // https://github.com/tutsplus/create-common-app-layouts-in-react-native
 
@@ -229,7 +230,8 @@ export default class Calendar extends Component {
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1
+		flex: 1,
+		backgroundColor: Theme.backgroundColor,
 	},
 	
 	calendar_weekdays: {
@@ -238,7 +240,7 @@ const styles = StyleSheet.create({
 	},
 	calendar_weekdays_text: {
 		flex: 1,
-		color: '#C0C0C0',
+		color: Theme.dullTextColor,
 		textAlign: 'center'
 	},
 	week_days: {

@@ -12,6 +12,7 @@ import { EventRegister } from 'react-native-event-listeners'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Button from './Button'
 import Log from '../helpers/Log'
+import Theme from '../helpers/Theme'
 
 export default class DayDetails extends Component {
 	
@@ -68,7 +69,7 @@ export default class DayDetails extends Component {
 				}
 
 				eventElements.push(
-					<Button key={'dayDetailsEvent' + i} style={styles.eventContainer} onPress={() => this._onEventPress(event)}>
+					<Button key={'dayDetailsEvent' + i} viewStyle={styles.eventContainer} onPress={() => this._onEventPress(event)}>
 						<View style={[styles.leftHighlight, {backgroundColor: event.calendar.color}]}>
 						</View>
 						<Text style={[styles.notes_text]}>
@@ -93,7 +94,7 @@ export default class DayDetails extends Component {
 						</View>
 
 						<Button onPress={this.props.parent._onNewEventPress}>
-							<Icon name='event' size={30} color='#000000' />
+							<Icon name='event' size={30} color={Theme.textColor} />
 						</Button>
 					</View>
 
@@ -124,14 +125,15 @@ const styles = StyleSheet.create({
 	},
 
 	timeText: {
-		fontSize: 14,
+		fontSize: 16,
 		paddingLeft: 10,
-		color: '#C0C0C0',
+		color: Theme.dullTextColor, //'#C0C0C0',
 	},
 	
 	notes_text: {
-		fontSize: 14,
+		fontSize: 16,
 		paddingLeft: 10,
+		color: Theme.textColor,
 	},
 
 	notes_selected_date: {
@@ -142,19 +144,21 @@ const styles = StyleSheet.create({
 	notes: {
 		padding: 10,
 		flexDirection: 'row',
-		backgroundColor: '#FAFAFA'
+		//backgroundColor: '#FAFAFA'
 	},
 	notes_notes: {
 		flex: 3
 	},
 	
 	small_text: {
-		fontSize: 15
+		fontSize: 15,
+		color: Theme.textColor,
 	},
 
 	big_text: {
 		fontSize: 50,
-		fontWeight: 'bold'
+		fontWeight: 'bold',
+		color: Theme.textColor,
 	},
 	inline: {
 		flexDirection: 'row'

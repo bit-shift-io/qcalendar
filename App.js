@@ -13,7 +13,7 @@ import {Platform, StyleSheet, Text, View, Button, Alert, Linking} from 'react-na
 import RNCalendarEvents from 'react-native-calendar-events'; // calander
 
 // https://code.tutsplus.com/tutorials/common-react-native-app-layouts-calendar-page--cms-27641
-import Calendar from './pages/Calendar';
+import Calendar from './views/Calendar';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',

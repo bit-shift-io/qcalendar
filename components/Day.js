@@ -16,6 +16,7 @@ import Button from './Button'
 import API from '../helpers/API';
 import { EventRegister } from 'react-native-event-listeners'
 import Log from '../helpers/Log'
+import Theme from '../helpers/Theme';
 
 export default class Day extends Component {
 
@@ -133,7 +134,8 @@ export default class Day extends Component {
         return (
             <Button 
                 onPress={this._onPress} 
-                style={[styles.viewContainer, viewStyle]} >	
+                touchableStyle={{flex: 1}}
+                viewStyle={[styles.viewContainer, viewStyle]} >	
                     {this._renderTopHighlight()}
                     <Text style={styles.tiny_text}>{date}</Text>
                     {eventElements}
@@ -156,19 +158,19 @@ const styles = StyleSheet.create({
     },
 
     pastView: {
-		backgroundColor: '#F5F5F5',
+		backgroundColor: Theme.pastDayBackgroundColor,
         padding: 2,
         //backgroundColor: 'green',
     },
     
 	todayView: {
-		backgroundColor: 'white',
+		backgroundColor: Theme.currentAndFutureDayBackgroundColor,
 		padding: 1,
 		margin: 1
     },
     
     futureView: {
-		backgroundColor: 'white',
+		backgroundColor: Theme.currentAndFutureDayBackgroundColor,
 		padding: 1,
 		margin: 1
     },
