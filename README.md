@@ -36,6 +36,8 @@ react-native-vector-icons
 react-native-linear-gradient
 moment
 https://www.npmjs.com/package/react-native-modal-datetime-picker
+https://github.com/jamesisaac/react-native-background-task#installation
+https://github.com/zo0r/react-native-push-notification
 
 
 useful command lines for react:

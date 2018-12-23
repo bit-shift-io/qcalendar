@@ -17,6 +17,7 @@ import Calendar from './views/Calendar';
 import MenuLeft from './views/MenuLeft';
 import SideMenu from './components/SideMenu';
 import ViewUtils from './helpers/ViewUtils';
+import NotificationAPI from './helpers/NotificationAPI';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -75,6 +76,8 @@ export default class App extends Component<Props> {
       }
     })
     .catch(error => console.warn('Auth Error: ', error));*/
+
+    NotificationAPI.init();
   }
 
   toggleLeft() {

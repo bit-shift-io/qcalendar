@@ -76,7 +76,7 @@ export default class Day extends Component {
     }
 
     _onLayout(e, ref) {
-        Log.debug('day', '_onLayout');
+        //Log.debug('day', '_onLayout');
         let self = this;
         ref.measure(
             function(

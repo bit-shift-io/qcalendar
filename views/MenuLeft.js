@@ -8,6 +8,7 @@ import Log from '../helpers/Log'
 import Theme from '../helpers/Theme'
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Button from '../components/Button'
+import NotificationAPI from '../helpers/NotificationAPI';
 
 export default class MenuLeft extends Component {
     constructor(props) {
@@ -16,6 +17,19 @@ export default class MenuLeft extends Component {
 
     _onSettingsPress() {
         Log.debug(Log.ONPRESS, '_onSettingsPress');
+    }
+
+    _onTestNotificationPress() {
+        Log.debug(Log.ONPRESS, '_onTestNotificationPress');
+        /*
+        NotificationAPI.localNotification({
+            message: 'Test Notification',
+        });
+*/
+        NotificationAPI.localNotificationSchedule({
+            message: 'Test Notification Schedule',
+            date: new Date(Date.now() + (3 * 1000)),
+        });
     }
 
     render() {
@@ -63,6 +77,13 @@ export default class MenuLeft extends Component {
                 <Button onPress={this._onDeleteEventPress} touchableStyle={{}} viewStyle={[styles.rowContainer, styles.button]}>
                     <Icon name='close' size={30} color={'blue'} />
                     <Text style={styles.text}>Contacts</Text>
+                </Button>
+
+                <View style={styles.divider}/>
+
+                <Button onPress={this._onTestNotificationPress} touchableStyle={{}} viewStyle={[styles.rowContainer, styles.button]}>
+                    <Icon name='close' size={30} color={'blue'} />
+                    <Text style={styles.text}>Test Notification</Text>
                 </Button>
 
 
