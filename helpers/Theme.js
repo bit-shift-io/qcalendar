@@ -6,7 +6,8 @@ class Light {
     buttonHighlightColor = '#ccc';
 
     pastDayBackgroundColor = '#F5F5F5';
-    currentAndFutureDayBackgroundColor = 'white';
+    currentDayBackgroundColor = 'white';
+    futureDayBackgroundColor = 'white';
 
     editEvent = {
         backgroundColor: '#7a0000',
@@ -20,13 +21,14 @@ class Light {
 }
 
 class Dark {
-    backgroundColor = '#262626';
-    dullTextColor = '#C0C0C0';
+    backgroundColor = '#3f3f3f';
+    dullTextColor = '#ffffff'; //#C0C0C0';
     textColor = '#ffffff';
     buttonHighlightColor = '#ccc';
 
-    pastDayBackgroundColor = '#b0b0b0';
-    currentAndFutureDayBackgroundColor = '#c0c0c0';
+    pastDayBackgroundColor = 'transparent';
+    currentDayBackgroundColor = '#5a5a5a';
+    futureDayBackgroundColor = 'transparent';
 
     editEvent = {
         backgroundColor: '#7a0000',

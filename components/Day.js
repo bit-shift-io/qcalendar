@@ -18,6 +18,7 @@ import { EventRegister } from 'react-native-event-listeners'
 import Log from '../helpers/Log'
 import Theme from '../helpers/Theme';
 import Rect from '../helpers/Rect'
+import Color from '../helpers/Color'
 
 export default class Day extends Component {
 
@@ -138,12 +139,15 @@ export default class Day extends Component {
         else if (this.state.events.length >= 2)
             numberOfLines = 3;
 
+        let isPast = this.state.tense == 'past';
         let eventTextStyle = this.tenseOptions[this.state.tense].eventTextStyle;
         var eventElements = [];
         for (let i = 0; i < this.state.events.length; ++i) {
             var event = this.state.events[i];
+            let color = isPast ? Color.mix(event.calendar.color, Theme.textColor, 0.5) : event.calendar.color;
+
             eventElements.push(
-                <Text key={i} style={[eventTextStyle, {color: event.calendar.color}]} 
+                <Text key={i} style={[eventTextStyle, {color: color}]} 
                     numberOfLines={numberOfLines} ellipsizeMode={'clip'}>
                     {event.title}
                 </Text>
@@ -193,13 +197,13 @@ const styles = StyleSheet.create({
     },
     
 	todayView: {
-		backgroundColor: Theme.currentAndFutureDayBackgroundColor,
+		backgroundColor: Theme.currentDayBackgroundColor,
 		padding: 1,
 		margin: 1
     },
     
     futureView: {
-		backgroundColor: Theme.currentAndFutureDayBackgroundColor,
+		backgroundColor: Theme.futureDayBackgroundColor,
 		padding: 1,
 		margin: 1
     },
@@ -210,14 +214,14 @@ const styles = StyleSheet.create({
     
     tiny_text: {
 		textAlign: 'center',
-		color: '#A9A9A9',
+		color: Theme.dullTextColor,
         fontSize: 10,
         //backgroundColor: 'green',
     },
 
     fadedText: {
 		textAlign: 'left',
-		color: '#A9A9A9',
+		color: Theme.dullTextColor,
         fontSize: 8,
         opacity: 0.5,
         letterSpacing: -0.2,
@@ -226,7 +230,7 @@ const styles = StyleSheet.create({
     
     text: {
 		textAlign: 'left',
-		color: '#A9A9A9',
+		color: Theme.dullTextColor,
         fontSize: 8,
         opacity: 1.0,
         letterSpacing: -0.2,
