@@ -11,7 +11,12 @@ class Light {
     editEvent = {
         backgroundColor: '#7a0000',
         buttonRowBackgroundColor: '#b60000',
-    }
+    };
+
+    menu = {
+        backgroundColor: 'white',
+        textColor: '#000000',
+    };
 }
 
 class Dark {
@@ -26,7 +31,12 @@ class Dark {
     editEvent = {
         backgroundColor: '#7a0000',
         buttonRowBackgroundColor: '#b60000',
-    }
+    };
+
+    menu = {
+        backgroundColor: '#000000',
+        textColor: '#ffffff',
+    };
 }
 
 class Theme

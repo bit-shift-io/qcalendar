@@ -49,6 +49,7 @@ export default class Calendar extends Component {
 		}
 		
 		this._days = [];
+		this._yScrollOffset = 0;
 	}
 
 	componentWillMount () {
@@ -69,11 +70,14 @@ export default class Calendar extends Component {
 	onEventDrop({draggable, x, y, event}) {
 		Log.debug('calander', 'onEventDrop');
 
+		// modify y by the scroll offset
+		y += this._yScrollOffset;
+
 		for (let i = 0; i < this._days.length; ++i) {
 			let day = this._days[i];
 			if (day && day.isDropArea({x, y})) {
 
-				// TODO: move the event from where it was to the selected day
+				// move the event from where it was to the selected day
 				// and trigger DayDetails to re-render
 				Log.debug('Calander', 'Move event: ' + event.id + ' from: ' + event.startDate + ' to:' + day.props.date.toISOString());
 
@@ -232,7 +236,10 @@ export default class Calendar extends Component {
 		const monthName = moment.utc([this.state.year, this.state.month, 1]).format('MMM');
 
 		return (
-			<ScrollView style={styles.container} ref={r => this._scrollView = r}>
+			<ScrollView style={styles.container} ref={r => this._scrollView = r}
+				scrollEventThrottle={16} onScroll={e => {
+					this._yScrollOffset = e.nativeEvent.contentOffset.y;
+				}}>
 				
 				<View style={styles.calendar_weekdays}>
 					{ this.renderWeekDays() }
