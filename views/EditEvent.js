@@ -22,6 +22,12 @@ export default class EditEvent extends Component {
 	static defaultProps = {
         style: {},
         date: moment.utc(),
+        event: {
+            id: null,
+            title: '',
+            location: '',
+            description: '',
+        },
 	}
 
 	constructor(props) {
@@ -39,23 +45,36 @@ export default class EditEvent extends Component {
 
         this._onNewEventConfirm = this._onNewEventConfirm.bind(this);
         this._onDeleteEventPress = this._onDeleteEventPress.bind(this);
+        this._onNewEventCancel = this._onNewEventCancel.bind(this);
 
+        let event = this.props.navigation.getParam('event', this.props.event);
+        let date = this.props.navigation.getParam('date', this.props.date);
+        let startDate = endDate = date; 
+        if (event.id != null) {
+            startDate = moment.utc(event.startDate);
+            endDate = moment.utc(event.endDate);
+        }
         this.state = {
             startDateTimePickerVisible: false,
-            startDate: this.props.date,
+            startDate: startDate,
             startDateModified: false, // modified by user?
             endDateTimePickerVisible: false,
-            endDate: this.props.date,
+            endDate: endDate,
             endDateModified: false, // modified by user?
-
-            event: {
-                id: null,
-                title: '',
-                location: '',
-                description: '',
-            }
+            event: event,
         }
-	}
+    }
+    
+    componentWillMount() {
+        var self = this;
+        this._daySelected = EventRegister.addEventListener(API.DAY_SELECTED, (day) => {
+            self.setDate(day.props.date);
+        });
+    }
+
+    componentWillUnmount() {
+        EventRegister.removeEventListener(this._daySelected)
+    }
 
     // user pressed on an event so lets populate this dialog
     editEvent(event) {
@@ -127,6 +146,11 @@ export default class EditEvent extends Component {
         return this.state.endDate.isSameOrAfter(this.state.startDate);
     }*/
 
+    _onNewEventCancel() {
+        //this.props.parent._onNewEventPress;
+        this.props.navigation.goBack();
+    }
+
     _onNewEventConfirm() {
         // validate form
         if (!this.state.event.title || this.state.event.title == '') {
@@ -189,14 +213,15 @@ export default class EditEvent extends Component {
         })
         .then(id => {
             console.log("Saved calander event: " + id);
-            this.props.parent._onNewEventPress();
+            //this.props.parent._onNewEventPress();
+            this.props.navigation.goBack();
         });
     }
 
     _onDeleteEventPress() {
         API.removeEvent(this.state.event.id).then(ok => {
             Log.debug(Log.ASYNC, "Deleted calander event:" + this.state.event.id);
-            this.props.parent._onNewEventPress();
+            //this.props.parent._onNewEventPress();
         });
     }
 
@@ -282,11 +307,13 @@ export default class EditEvent extends Component {
                             value={this.state.event.description}/>
                     </View>
                 </View>
+
+                <View style={[styles.rowContainer, {flex: 1}]}></View>
 				
 				<View style={[styles.rowContainer, styles.buttonRow]}>
                     {this._renderDeleteButton()}
 
-                    <Button onPress={this.props.parent._onNewEventPress} touchableStyle={{flex: 1}} viewStyle={styles.button}>
+                    <Button onPress={this._onNewEventCancel} touchableStyle={{flex: 1}} viewStyle={styles.button}>
                         <Icon name='close' size={30} color={Theme.textColor} />
                     </Button>
                     
@@ -357,6 +384,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'column'
 	},
 	viewContainer: {
+        flex: 1,
 		//padding: 10,
 		flexDirection: 'column',
 		backgroundColor: Theme.editEvent.backgroundColor,

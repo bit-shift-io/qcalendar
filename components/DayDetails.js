@@ -29,6 +29,9 @@ export default class DayDetails extends Component {
 	constructor(props) {
 		super(props);
 		this.setDate = this.setDate.bind(this);
+		this._onNewEventPress = this._onNewEventPress.bind(this);
+		this._onEventPress = this._onEventPress.bind(this);
+		this._onEventDrop = this._onEventDrop.bind(this);
 	}
 
 	componentWillMount() {
@@ -54,6 +57,11 @@ export default class DayDetails extends Component {
 	_onEventPress(event) {
 		Log.debug(Log.ONPRESS, "_onEventPress");
 		this.props.parent.onEventPress(event);
+	}
+
+	_onNewEventPress() {
+		Log.debug(Log.ONPRESS, "_onEventPress");
+		this.props.parent._onNewEventPress();
 	}
 
 	render() {
@@ -101,7 +109,7 @@ export default class DayDetails extends Component {
 							<Text style={styles.small_text}> {selectedDate.format('dddd').toUpperCase()}</Text>
 						</View>
 
-						<Button onPress={this.props.parent._onNewEventPress}>
+						<Button onPress={this._onNewEventPress}>
 							<Icon name='event' size={30} color={Theme.textColor} />
 						</Button>
 					</View>

@@ -4,9 +4,11 @@ import {
   StyleSheet,
   Text,
   View,
-  ScrollView
+  ScrollView,
+  PanResponder,
 } from 'react-native';
 
+import { EventRegister } from 'react-native-event-listeners'
 import moment from 'moment';
 import LinearGradient from 'react-native-linear-gradient';
 import EditEvent from './EditEvent'
@@ -28,6 +30,7 @@ import Week from '../components/Week';
 import DayDetails from '../components/DayDetails';
 import API from '../helpers/API';
 import Log from '../helpers/Log'
+import * as ViewUtils from '../helpers/ViewUtils'
 
 export default class Calendar extends Component {
 
@@ -36,6 +39,7 @@ export default class Calendar extends Component {
 
 		this._onDayPress = this._onDayPress.bind(this);
 		this._onNewEventPress = this._onNewEventPress.bind(this);
+		this.onPanResponderRelease = this.onPanResponderRelease.bind(this);
 		
 		var date = new Date();
 		this.state = {
@@ -59,7 +63,63 @@ export default class Calendar extends Component {
 			console.log("events fetched");
 			this.setState({forceUpdateDays: moment.utc()});
 		});
+
+		this.responder = PanResponder.create({
+			onStartShouldSetResponderCapture: () => {
+				return true
+			},
+			onMoveShouldSetPanResponder: this.onMoveShouldSetPanResponder,
+			//onPanResponderMove: this.onPanResponderMove,
+			onPanResponderRelease: this.onPanResponderRelease,
+			//onPanResponderTerminate: this.onPanResponderTerminate,
+		});
 	}
+
+	onMoveShouldSetPanResponder(e: any, gestureState: any): boolean {
+		//if (this.gesturesAreEnabled()) {
+		  const x = Math.round(Math.abs(gestureState.dx));
+		  const y = Math.round(Math.abs(gestureState.dy));
+	
+		  const edgeHitWidth = 60;
+		  const toleranceY = 10;
+		  const toleranceX = 10;
+		  const touchMoved = x > toleranceX && y < toleranceY;
+	/*
+		  if (this.isOpen) {
+			return touchMoved;
+		  }
+	*/	  
+	
+		  const menuPosition = 'left';
+		  const withinEdgeHitWidth = menuPosition === 'right' ?
+			gestureState.moveX > (deviceScreen.width - edgeHitWidth) :
+			gestureState.moveX < edgeHitWidth;
+	
+		  let menuPositionMultiplier = menuPosition === 'right' ? -1 : 1;
+		  const swipingToOpen = menuPositionMultiplier * gestureState.dx > 0;
+		  return withinEdgeHitWidth && touchMoved && swipingToOpen;
+		//}
+	
+		//return false;
+	  }
+
+	onPanResponderRelease(e: Object, gestureState: Object) {
+		/*
+		const offsetLeft = this.menuPositionMultiplier() *
+		  (this.state.left.__getValue() + gestureState.dx);
+	
+		this.openMenu(shouldOpenMenu(offsetLeft));*/
+
+		const menuPosition = 'left';
+		let menuPositionMultiplier = menuPosition === 'right' ? -1 : 1;
+		const offsetLeft = menuPositionMultiplier * gestureState.dx;
+		const barrierForward = ViewUtils.VIEW_WIDTH / 4;
+		let shouldOpen = offsetLeft > barrierForward;
+		if (shouldOpen) {
+			//this.props.navigation.navigate('MenuLeft');
+			this.props.navigation.toggleDrawer();
+		}
+	  }
 
 	renderWeekDays() {
 		let weekdays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -101,9 +161,11 @@ export default class Calendar extends Component {
 	_onDayPress(day) {
 		Log.debug(API.ONPRESS, "day pressed:" + day.props.date.toISOString());
 		this._dayDetails.setDate(day.props.date);
+		EventRegister.emit(API.DAY_SELECTED, day);
+/*
 		if (this._editEvent) {
 			this._editEvent.setDate(day.props.date);
-		}
+		}*/
 	}
 
 	renderWeeks() {
@@ -138,18 +200,22 @@ export default class Calendar extends Component {
 	}
 	
 	_onNewEventPress() {
-		var self = this;
+		//var self = this;
+		Log.debug('calendar', '_onNewEventPress');
+		this.props.navigation.navigate('EditEvent', {date: this._dayDetails.state.date});
+		/*
 		this.setState({newEventPageVisible: !this.state.newEventPageVisible}, () => {
-			if (this._scrollView) {
+			if (this._dayDetailsScrollView) {
 				setTimeout(() => {
-					self._scrollView.scrollToEnd({animated: true});
+					self._dayDetailsScrollView.scrollToEnd({animated: true});
 				}, 100);
 			}
-		});
+		});*/
 	}
 
 	// when the user presses an event on the DayDetails
 	onEventPress(event) {
+		/*
 		var self = this;
 		this.setState({newEventPageVisible: true}, () => {
 			if (this._scrollView) {
@@ -160,7 +226,9 @@ export default class Calendar extends Component {
 					self._scrollView.scrollToEnd({animated: true});
 				}, 100);
 			}
-		});
+		});*/
+
+		this.props.navigation.navigate('EditEvent', {event: event});
 	}
 	
 	_renderNewEventPage() {
@@ -175,16 +243,21 @@ export default class Calendar extends Component {
 
 	render() {
 		Log.debug(Log.RENDER, "Calander Render");
-		const monthName = moment.utc([this.state.year, this.state.month, 1]).format('MMM');
+		//const monthName = moment.utc([this.state.year, this.state.month, 1]).format('MMM');
 /*
 		<InfiniteFlatList />
+
+
+					{this._renderNewEventPage()}
+
+					{...this.responder.panHandlers}
 */
 		return (
 
-			<View style={styles.container}>
+			<View style={styles.container} {...this.responder.panHandlers}>
 				
 
-				<ScrollView style={styles.container} ref={r => this._scrollView = r}
+				<ScrollView style={styles.calendarContainer} ref={r => this._scrollView = r}
 					scrollEventThrottle={16} onScroll={e => {
 						this._yScrollOffset = e.nativeEvent.contentOffset.y;
 					}}>
@@ -196,9 +269,16 @@ export default class Calendar extends Component {
 						{ this.renderWeeks() }
 					</View>
 						
-					<DayDetails ref={r => this._dayDetails = r} parent={this}/>
+				</ScrollView>
 
-					{this._renderNewEventPage()}
+				<View style={styles.divider}/>
+
+				<ScrollView style={styles.dayDetailsContainer} ref={r => this._dayDetailsScrollView = r}
+					scrollEventThrottle={16} onScroll={e => {
+						/*this._yScrollOffset = e.nativeEvent.contentOffset.y;*/
+					}}>
+
+					<DayDetails ref={r => this._dayDetails = r} parent={this}/>
 
 				</ScrollView>
 			</View>
@@ -210,6 +290,23 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: Theme.backgroundColor,
+	},
+
+	container: {
+		flex: 1,
+		backgroundColor: Theme.backgroundColor,
+	},
+
+	dayDetailsContainer: {
+		flex: 0,
+		height: 180,
+		backgroundColor: Theme.backgroundColor,
+	},
+
+	divider: {
+		height: 2,
+		width: '100%',
+		backgroundColor: 'red',
 	},
 	
 	calendar_weekdays: {

@@ -14,11 +14,44 @@ import RNCalendarEvents from 'react-native-calendar-events'; // calander
 
 // https://code.tutsplus.com/tutorials/common-react-native-app-layouts-calendar-page--cms-27641
 import Calendar from './views/Calendar';
+import EditEvent from './views/EditEvent';
 import MenuLeft from './views/MenuLeft';
+import Settings from './views/Settings';
 import SideMenu from './components/SideMenu';
-import ViewUtils from './helpers/ViewUtils';
+import * as ViewUtils from './helpers/ViewUtils'
 import NotificationAPI from './helpers/NotificationAPI';
 import API from './helpers/API';
+
+import { createStackNavigator, createAppContainer, createDrawerNavigator } from 'react-navigation'
+
+// Manifest of possible screens
+const AppNavigator = createStackNavigator({
+  Calendar: { screen: Calendar },
+  EditEvent: { screen: EditEvent },
+  Settings: { screen: Settings },
+}, {
+  // Default config for all screens
+  headerMode: 'none',
+  initialRouteName: 'Calendar'
+});
+
+const LeftMenuComponent = (props) => (
+  <MenuLeft {...props} />
+);
+
+const MyDrawerNavigator = createDrawerNavigator({
+  AppNavigator: { screen: AppNavigator },
+}, {
+  defaultNavigationOptions: {
+    gesturesEnabled: false,
+  },
+  drawerWidth: ViewUtils.VIEW_WIDTH * 0.8,
+  drawerPosition: 'left',
+  drawerType: 'front',
+  contentComponent: LeftMenuComponent,
+});
+
+const AppContainer = createAppContainer(MyDrawerNavigator);
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -69,21 +102,28 @@ export default class App extends Component<Props> {
   }
 
   render() {
+    /*
     const menuLeft = <MenuLeft key='menuLeft' onItemSelected={this._onMenuLeftItemSelected} />;
 
+
+    <SideMenu
+    menu={menuLeft}
+    isOpen={this.state.isOpenLeft}
+    onChange={isOpen => this.updateMenuStateLeft(isOpen)}
+    menuPosition="left"
+    openMenuOffset={ViewUtils.VIEW_WIDTH}
+  >
+  <Calendar app={this} />
+</SideMenu>
+*/
     return (
-      <SideMenu
-          menu={menuLeft}
-          isOpen={this.state.isOpenLeft}
-          onChange={isOpen => this.updateMenuStateLeft(isOpen)}
-          menuPosition="left"
-          openMenuOffset={ViewUtils.VIEW_WIDTH}
-        >
-        <Calendar app={this} />
-      </SideMenu>
+      <AppContainer />    
     );
   }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
 });

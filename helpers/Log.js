@@ -17,7 +17,7 @@ class Log {
     ASYNC = 'async'; // async task completed
 
     enabled = true; // set to false to disable logging in release builds
-    channelsToIgnore = [this.RENDER];
+    channelsToIgnore = [];//this.RENDER];
 
     debug(channel, args) {
         if (!this.enabled)

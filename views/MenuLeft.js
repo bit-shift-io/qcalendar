@@ -13,10 +13,12 @@ import NotificationAPI from '../helpers/NotificationAPI';
 export default class MenuLeft extends Component {
     constructor(props) {
         super(props);
+        this._onSettingsPress = this._onSettingsPress.bind(this);
     }
 
     _onSettingsPress() {
         Log.debug(Log.ONPRESS, '_onSettingsPress');
+        this.props.navigation.navigate('Settings');
     }
 
     _onTestNotificationPress() {

@@ -12,6 +12,7 @@ class API {
 
     // events to listen too
     EVENTS_CHANGED = 'eventsChanged';
+    DAY_SELECTED = 'daySelected';
 
     loadFromLocalStorage = false;
     events = [];
