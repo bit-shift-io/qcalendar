@@ -156,11 +156,12 @@ export default class Day extends Component {
 
         let viewStyle = this.tenseOptions[this.state.tense].viewStyle;
 
+        /*
         // don't show the day of the month if it doesnt belong to this month
         if (this.props.monthStartDate.month() != this.props.date.month()) {
             date = '';
             viewStyle = styles.notThisMonthView;
-        }
+        }*/
 
         return (
             <Button 

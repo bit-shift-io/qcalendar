@@ -18,13 +18,7 @@ import MenuLeft from './views/MenuLeft';
 import SideMenu from './components/SideMenu';
 import ViewUtils from './helpers/ViewUtils';
 import NotificationAPI from './helpers/NotificationAPI';
-
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import API from './helpers/API';
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -46,37 +40,7 @@ export default class App extends Component<Props> {
   }
 
   componentWillMount () {
-
-    // TODO: move the API.init
-    RNCalendarEvents.authorizationStatus()
-         .then(status => {
-            console.log("Calander auth status: " + status);
-
-           // if the status was previous accepted, set the authorized status to state
-           this.setState({ cal_auth: status })
-           if(status === 'undetermined') {
-             // if we made it this far, we need to ask the user for access 
-             RNCalendarEvents.authorizeEventStore()
-             .then((out) => {
-               if(out == 'authorized') {
-                 // set the new status to the auth state
-                 this.setState({ cal_auth: out })
-               }
-             })
-            }
-          })
-    .catch(error => console.warn('Auth Error: ', error));
-/*
-    // Android
-    RNCalendarEvents.authorizeEventStore()
-    .then((out) => {
-      if(out == 'authorized') {
-        // set the new status to the auth state
-        this.setState({ cal_auth: out })
-      }
-    })
-    .catch(error => console.warn('Auth Error: ', error));*/
-
+    API.init();
     NotificationAPI.init();
   }
 

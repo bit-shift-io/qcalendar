@@ -15,6 +15,7 @@ class API {
 
     loadFromLocalStorage = false;
     events = [];
+    authorizationStatus = false;
 
     constructor() {
         //this.init = this.init.bind(this);
@@ -26,6 +27,43 @@ class API {
 
         var self = this;
 
+        // check for permission
+        return RNCalendarEvents.authorizationStatus()
+        .then(status => {
+            Log.debug(Log.API, "Calander auth status: " + status);
+
+            // if the status was previous accepted, set the authorized status to state
+            authorizationStatus = status;
+            if(status === 'undetermined') {
+                // if we made it this far, we need to ask the user for access 
+                RNCalendarEvents.authorizeEventStore()
+                .then((out) => {
+                    if(out == 'authorized') {
+                        // set the new status to the auth state
+                        authorizationStatus = out;
+                        return this._loadFromLocalStorage();
+                    }
+                })
+
+                return;
+            }
+
+            return this._loadFromLocalStorage();
+        })
+        .catch(error => console.warn('Auth Error: ', error));
+        /*
+        // Android
+        RNCalendarEvents.authorizeEventStore()
+        .then((out) => {
+        if(out == 'authorized') {
+        // set the new status to the auth state
+        this.setState({ cal_auth: out })
+        }
+        })
+        .catch(error => console.warn('Auth Error: ', error));*/        
+    }
+
+    _loadFromLocalStorage() {
         if (!this.loadFromLocalStorage)
             return;
 
