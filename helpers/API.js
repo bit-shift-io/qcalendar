@@ -86,31 +86,6 @@ class API {
         return promise;
     }
 
-    // TODO: move to a Date helper class?
-    computeStartAndEndOfMonth(year, month) {
-        Log.debug(Log.API, "year: " + year + " month: " + month);
-
-        const startDate = moment.utc([year, month, 1]);
-        
-        /* how to get a date into utc from a none utc date:
-        var m = moment([year, month, 1]);
-        const startDate2 = moment(m).utc().add(m.utcOffset(), 'm');
-        Log.debug(Log.API, "startDate2:" + startDate2.toISOString());
-        */
-
-        // get the number of days for this month
-        const daysInMonth = startDate.daysInMonth();
-
-        // we are adding the days in this month to the start date (minus the first day)
-        const endDate = moment.utc(startDate).add(daysInMonth - 1, 'days');
-
-        let date = startDate.toDate();
-        Log.debug(Log.API, "Start Date:" + startDate.toISOString(true));
-        Log.debug(Log.API, "End Date:" + endDate.toISOString(true));
-
-        return {startDate, endDate};
-    }
-
     async fetchEvents({startDate, endDate}) {
         var self = this;
         var start = startDate.toISOString();

@@ -15,6 +15,7 @@ export default class Draggable extends Component {
 	
 	static defaultProps = {
         onDrop: () => {},
+        style: {},
     }
     
     constructor(props) {
@@ -84,7 +85,7 @@ export default class Draggable extends Component {
 		return (
             <Animated.View 
                 {...this.panResponder.panHandlers}
-                style={[panStyle, styles.circle]}>
+                style={[panStyle, styles.circle, this.props.style]}>
                 {this.props.children}
             </Animated.View>
 		);

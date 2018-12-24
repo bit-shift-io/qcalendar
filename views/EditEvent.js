@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     },
 
     titleText: {
-        fontSize: 20,
+        fontSize: 18,
         color: Theme.textColor,
         paddingHorizontal: 10,
         paddingVertical: 10,
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
 	},
 	
 	notes_text: {
-		fontSize: 14,
+		fontSize: 12,
 		paddingLeft: 10,
 	},
 
@@ -401,14 +401,6 @@ const styles = StyleSheet.create({
 	},
 	
 	small_text: {
-		fontSize: 16
-	},
-
-	big_text: {
-		fontSize: 50,
-		fontWeight: 'bold'
-	},
-	inline: {
-		flexDirection: 'row'
+		fontSize: 14
 	},
 });

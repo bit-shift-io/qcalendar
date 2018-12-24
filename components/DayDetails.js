@@ -78,27 +78,28 @@ export default class DayDetails extends Component {
 				let timeElement = null;
 				if (!event.allDay) {
 					timeElement =	<Text style={[styles.timeText]}>
-										| {startDate.format('hh:mm a')}
+										{startDate.format('hh:mma').slice(0, -1)}
 									</Text>;
 				}
 
 				eventElements.push(
-					<Draggable key={'dayDetailsEvent' + i} onDrop={(params) => this._onEventDrop(params, event)}>
+					<Draggable key={'dayDetailsEvent' + i} onDrop={(params) => this._onEventDrop(params, event)}
+						style={{}}>
 						<Button viewStyle={styles.eventContainer} onPress={() => this._onEventPress(event)}>
 							<View style={[styles.leftHighlight, {backgroundColor: event.calendar.color}]}>
 							</View>
+							{timeElement}
 							<Text style={[styles.notes_text]}>
 								{event.title}
 							</Text>
-							{timeElement}
 						</Button>
 					</Draggable>
-					);
+				);
 			}
 		}
 
 		  return (
-			<View style={styles.notes}>	
+			<View style={styles.viewContainer}>	
 					<View style={styles.notes_notes}>
 						{eventElements}
 					</View>
@@ -109,7 +110,7 @@ export default class DayDetails extends Component {
 							<Text style={styles.small_text}> {selectedDate.format('dddd').toUpperCase()}</Text>
 						</View>
 
-						<Button onPress={this._onNewEventPress}>
+						<Button onPress={this._onNewEventPress} viewStyle={styles.buttonStyle}>
 							<Icon name='event' size={30} color={Theme.textColor} />
 						</Button>
 					</View>
@@ -138,32 +139,42 @@ const styles = StyleSheet.create({
 	eventContainer: {
 		paddingBottom: 2,
 		flexDirection: 'row',
+		//backgroundColor: 'orange',
 	},
 
 	timeText: {
+		flex: 0,
+		width: 60,
 		fontSize: 16,
 		paddingLeft: 10,
 		color: Theme.dullTextColor, //'#C0C0C0',
+		opacity: 0.5,
 	},
 	
 	notes_text: {
+		flex: 10,
 		fontSize: 16,
 		paddingLeft: 10,
 		color: Theme.textColor,
+		
 	},
 
 	notes_selected_date: {
-		flex: 1,
+		flex: 0,
 		alignItems: 'flex-end',
-		flexDirection: 'column'
+		flexDirection: 'column',
+		//backgroundColor: 'red'
 	},
-	notes: {
-		padding: 10,
+	viewContainer: {
+		padding: 5,
 		flexDirection: 'row',
+		flex: 1,
 		//backgroundColor: '#FAFAFA'
 	},
 	notes_notes: {
-		flex: 3
+		flex: 3,
+		//backgroundColor: 'blue',
+
 	},
 	
 	small_text: {
@@ -179,4 +190,8 @@ const styles = StyleSheet.create({
 	inline: {
 		flexDirection: 'row'
 	},
+
+	buttonStyle: {
+		padding: 10,
+	}
 });

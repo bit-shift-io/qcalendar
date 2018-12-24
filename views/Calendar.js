@@ -45,11 +45,12 @@ export default class Calendar extends Component {
 		this.state = {
 	      calendars: [], 	// list of CalDAV calendars to display
 	      events: [], 		// what events to display on the calander
-	      year: date.getFullYear(),	// selected month
-		  month: date.getMonth(),	// selected year
+	      //year: date.getFullYear(),	// selected month
+		  //month: date.getMonth(),	// selected year
 		  selectedDate: moment.utc(), // today!
 		  forceUpdateDays: moment.utc(),
 		  newEventPageVisible: false,
+		  viewType: '2-week', //'2-week', //'month'
 		}
 		
 		this._days = [];
@@ -59,7 +60,7 @@ export default class Calendar extends Component {
 	componentWillMount () {
 		API.findCalendars();
 
-		API.fetchEvents(API.computeStartAndEndOfMonth(this.state.year, this.state.month)).then((events) => {
+		API.fetchEvents(this.computeStartAndEndOfMonth()).then((events) => {
 			console.log("events fetched");
 			this.setState({forceUpdateDays: moment.utc()});
 		});
@@ -74,6 +75,41 @@ export default class Calendar extends Component {
 			//onPanResponderTerminate: this.onPanResponderTerminate,
 		});
 	}
+
+    computeStartAndEndOfMonth() {
+		if (this.state.viewType == 'month') {
+			let year = this.state.selectedDate.year();
+			let month = this.state.selectedDate.month();
+
+			Log.debug('calendar', "year: " + year + " month: " + month);
+
+			const startDate = moment.utc([year, month, 1]);
+			
+			/* how to get a date into utc from a none utc date:
+			var m = moment([year, month, 1]);
+			const startDate2 = moment(m).utc().add(m.utcOffset(), 'm');
+			Log.debug(Log.API, "startDate2:" + startDate2.toISOString());
+			*/
+
+			// get the number of days for this month
+			const daysInMonth = startDate.daysInMonth();
+
+			// we are adding the days in this month to the start date (minus the first day)
+			const endDate = moment.utc(startDate).add(daysInMonth - 1, 'days');
+
+			let date = startDate.toDate();
+			Log.debug(Log.API, "Start Date:" + startDate.toISOString(true));
+			Log.debug(Log.API, "End Date:" + endDate.toISOString(true));
+
+			return {startDate, endDate};
+		}
+		else if (this.state.viewType == '2-week') {
+			const lastSunday = moment.utc(this.state.selectedDate).startOf('week');
+			let startDate = moment.utc(lastSunday).subtract(7, 'days');
+			let endDate = moment.utc(lastSunday).add(21, 'days');
+			return {startDate, endDate};
+		}
+    }
 
 	onMoveShouldSetPanResponder(e: any, gestureState: any): boolean {
 		//if (this.gesturesAreEnabled()) {
@@ -162,6 +198,14 @@ export default class Calendar extends Component {
 		Log.debug(API.ONPRESS, "day pressed:" + day.props.date.toISOString());
 		this._dayDetails.setDate(day.props.date);
 		EventRegister.emit(API.DAY_SELECTED, day);
+
+		/*
+		for (let i = 0; i < this._days.length; ++i) {
+			if (this.days[i].props.date != day.props.date) {
+				this._days[i].setSelected(false);
+			}	
+		}
+		day.setSelected(true);*/
 /*
 		if (this._editEvent) {
 			this._editEvent.setDate(day.props.date);
@@ -169,6 +213,12 @@ export default class Calendar extends Component {
 	}
 
 	renderWeeks() {
+
+		let {startDate, endDate} = this.computeStartAndEndOfMonth();
+		let totalDays = endDate.diff(startDate, 'days');
+		let numberOfWeeks = totalDays / 7;
+		/*
+
 		let lastSunday = this.startDate.startOf('week');
 		let numberOfDaysFromLastSunday = this.startDate.diff(lastSunday, 'days');
 		let numberOfDaysThisMonth = this.startDate.daysInMonth() + 1;
@@ -178,10 +228,10 @@ export default class Calendar extends Component {
 
 		totalDays += numberOfDaysNextMonth;
 		let numberOfWeeks = totalDays / 7;
-
+*/
 		let weeks = [];
 		for (let i = 0; i < numberOfWeeks; ++i) {
-			let weekStartDate = moment.utc(lastSunday);
+			let weekStartDate = moment.utc(startDate);
 			weekStartDate = weekStartDate.add(7 * i, 'days');
 			weekEndDate = moment.utc(weekStartDate).add(7, 'days');
 			weeks.push(
@@ -252,12 +302,11 @@ export default class Calendar extends Component {
 
 					{...this.responder.panHandlers}
 */
+		let calendarHeight = this.state.viewType == 'month' ? 400 : 280;
 		return (
-
 			<View style={styles.container} {...this.responder.panHandlers}>
-				
 
-				<ScrollView style={styles.calendarContainer} ref={r => this._scrollView = r}
+				<ScrollView style={[styles.calendarContainer, {height: calendarHeight}]} ref={r => this._scrollView = r}
 					scrollEventThrottle={16} onScroll={e => {
 						this._yScrollOffset = e.nativeEvent.contentOffset.y;
 					}}>

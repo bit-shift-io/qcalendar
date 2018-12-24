@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     divider: {
         backgroundColor: Theme.menu.textColor,
         height: 2,
-        width: '100%',
+        width: '80%',
         opacity: 0.2,
         marginLeft: 10,
         marginRight: 10,

@@ -73,6 +73,9 @@ export default class Day extends Component {
         this._eventsChanged = EventRegister.addEventListener(API.EVENTS_CHANGED, (data) => {
             self.setState({events: API.getEventsForDate(self.props.date)});
         });
+        this._daySelected = EventRegister.addEventListener(API.DAY_SELECTED, (day) => {
+            self.setState({selected: day.props.date == self.props.date});
+        });
     }
 
     _onLayout(e, ref) {
@@ -96,6 +99,7 @@ export default class Day extends Component {
 
     componentWillUnmount() {
         EventRegister.removeEventListener(this._eventsChanged)
+        EventRegister.removeEventListener(this._daySelected)
     }
 
     isDropArea({x, y}) {
@@ -156,6 +160,8 @@ export default class Day extends Component {
 
         let viewStyle = this.tenseOptions[this.state.tense].viewStyle;
 
+        
+
         /*
         // don't show the day of the month if it doesnt belong to this month
         if (this.props.monthStartDate.month() != this.props.date.month()) {
@@ -163,13 +169,15 @@ export default class Day extends Component {
             viewStyle = styles.notThisMonthView;
         }*/
 
+        let selectedViewStyle = this.state.selected ? styles.selectedViewStyle : null;
+
         return (
             <Button 
                 onLayout={this._onLayout}
                 ref={r => this._button = r}
                 onPress={this._onPress} 
                 touchableStyle={{flex: 1}}
-                viewStyle={[styles.viewContainer, viewStyle]} >	
+                viewStyle={[styles.viewContainer, viewStyle, selectedViewStyle]} >	
                     {this._renderTopHighlight()}
                     <Text style={styles.tiny_text}>{date}</Text>
                     {eventElements}
@@ -183,6 +191,11 @@ const styles = StyleSheet.create({
 
     containerTop: {
         
+    },
+
+    selectedViewStyle: {
+        borderColor: 'red',
+        borderWidth: 1,
     },
 
     viewContainer: {
