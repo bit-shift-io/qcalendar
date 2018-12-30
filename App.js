@@ -7,7 +7,11 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Button, Alert, Linking} from 'react-native';
+import {
+  Platform, 
+  StyleSheet, 
+  Text, View, Button, Alert, Linking, 
+  DrawerLayoutAndroid} from 'react-native';
 
 // https://networksynapse.net/quick-introduction-to-react-natives-calendar-events/
 import RNCalendarEvents from 'react-native-calendar-events'; // calander
@@ -17,7 +21,7 @@ import Calendar from './views/Calendar';
 import EditEvent from './views/EditEvent';
 import MenuLeft from './views/MenuLeft';
 import Settings from './views/Settings';
-import SideMenu from './components/SideMenu';
+//import SideMenu from './components/SideMenu';
 import * as ViewUtils from './helpers/ViewUtils'
 import NotificationAPI from './helpers/NotificationAPI';
 import API from './helpers/API';
@@ -51,7 +55,7 @@ const MyDrawerNavigator = createDrawerNavigator({
   contentComponent: LeftMenuComponent,
 });
 
-const AppContainer = createAppContainer(MyDrawerNavigator);
+const AppContainer = createAppContainer(AppNavigator); //MyDrawerNavigator);
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -59,16 +63,16 @@ export default class App extends Component<Props> {
   constructor(props) {
     super(props);
 
-    this.toggleLeft = this.toggleLeft.bind(this);
+    //this.toggleLeft = this.toggleLeft.bind(this);
     //this.toggleRight = this.toggleRight.bind(this);
-    this.closeSideMenus = this.closeSideMenus.bind(this);
-    this._onMenuLeftItemSelected = this._onMenuLeftItemSelected.bind(this);
+    //this.closeSideMenus = this.closeSideMenus.bind(this);
+    //this._onMenuLeftItemSelected = this._onMenuLeftItemSelected.bind(this);
 
     this.state = {
-      cal_auth: '',
-      isOpenLeft: false,
-      isOpenRight: false,
-      selectedItem: 'About',
+      //cal_auth: '',
+      //isOpenLeft: false,
+      //isOpenRight: false,
+      //selectedItem: 'About',
     }
   }
 
@@ -76,7 +80,7 @@ export default class App extends Component<Props> {
     API.init();
     NotificationAPI.init();
   }
-
+/*
   toggleLeft() {
     this.setState({
       isOpenLeft: !this.state.isOpenLeft,
@@ -89,7 +93,9 @@ export default class App extends Component<Props> {
       isOpenLeft: false,
     });
   }
+*/
 
+/*
   _onMenuLeftItemSelected(item) {
     this.setState({
       isOpenLeft: false,
@@ -99,6 +105,15 @@ export default class App extends Component<Props> {
 
   updateMenuStateLeft(isOpenLeft) {
     this.setState({ isOpenLeft });
+  }
+*/
+
+  get navigation() {
+    return this.navigationContainer._navigation;
+  }
+
+  closeDrawers() {
+    this.leftDrawer.closeDrawer();
   }
 
   render() {
@@ -116,8 +131,26 @@ export default class App extends Component<Props> {
   <Calendar app={this} />
 </SideMenu>
 */
+/*
     return (
       <AppContainer />    
+    );*/
+
+    var navigationView = (
+      <MenuLeft
+        ref={r=> this.menuLeft = r}
+        app={this}/>
+    );
+    
+    return (
+      <DrawerLayoutAndroid
+        drawerWidth={ViewUtils.VIEW_WIDTH * 0.8}
+        drawerPosition={DrawerLayoutAndroid.positions.Left}
+        ref={r => this.leftDrawer = r}
+        renderNavigationView={() => navigationView}>
+        <AppContainer
+          ref={r => this.navigationContainer = r}/>
+      </DrawerLayoutAndroid>
     );
   }
 }

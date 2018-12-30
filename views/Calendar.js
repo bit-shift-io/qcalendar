@@ -39,7 +39,6 @@ export default class Calendar extends Component {
 
 		this._onDayPress = this._onDayPress.bind(this);
 		this._onNewEventPress = this._onNewEventPress.bind(this);
-		this.onPanResponderRelease = this.onPanResponderRelease.bind(this);
 		
 		var date = new Date();
 		this.state = {
@@ -63,16 +62,6 @@ export default class Calendar extends Component {
 		API.fetchEvents(this.computeStartAndEndOfMonth()).then((events) => {
 			console.log("events fetched");
 			this.setState({forceUpdateDays: moment.utc()});
-		});
-
-		this.responder = PanResponder.create({
-			onStartShouldSetResponderCapture: () => {
-				return true
-			},
-			onMoveShouldSetPanResponder: this.onMoveShouldSetPanResponder,
-			//onPanResponderMove: this.onPanResponderMove,
-			onPanResponderRelease: this.onPanResponderRelease,
-			//onPanResponderTerminate: this.onPanResponderTerminate,
 		});
 	}
 
@@ -110,52 +99,6 @@ export default class Calendar extends Component {
 			return {startDate, endDate};
 		}
     }
-
-	onMoveShouldSetPanResponder(e: any, gestureState: any): boolean {
-		//if (this.gesturesAreEnabled()) {
-		  const x = Math.round(Math.abs(gestureState.dx));
-		  const y = Math.round(Math.abs(gestureState.dy));
-	
-		  const edgeHitWidth = 60;
-		  const toleranceY = 10;
-		  const toleranceX = 10;
-		  const touchMoved = x > toleranceX && y < toleranceY;
-	/*
-		  if (this.isOpen) {
-			return touchMoved;
-		  }
-	*/	  
-	
-		  const menuPosition = 'left';
-		  const withinEdgeHitWidth = menuPosition === 'right' ?
-			gestureState.moveX > (deviceScreen.width - edgeHitWidth) :
-			gestureState.moveX < edgeHitWidth;
-	
-		  let menuPositionMultiplier = menuPosition === 'right' ? -1 : 1;
-		  const swipingToOpen = menuPositionMultiplier * gestureState.dx > 0;
-		  return withinEdgeHitWidth && touchMoved && swipingToOpen;
-		//}
-	
-		//return false;
-	  }
-
-	onPanResponderRelease(e: Object, gestureState: Object) {
-		/*
-		const offsetLeft = this.menuPositionMultiplier() *
-		  (this.state.left.__getValue() + gestureState.dx);
-	
-		this.openMenu(shouldOpenMenu(offsetLeft));*/
-
-		const menuPosition = 'left';
-		let menuPositionMultiplier = menuPosition === 'right' ? -1 : 1;
-		const offsetLeft = menuPositionMultiplier * gestureState.dx;
-		const barrierForward = ViewUtils.VIEW_WIDTH / 4;
-		let shouldOpen = offsetLeft > barrierForward;
-		if (shouldOpen) {
-			//this.props.navigation.navigate('MenuLeft');
-			this.props.navigation.toggleDrawer();
-		}
-	  }
 
 	renderWeekDays() {
 		let weekdays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -198,18 +141,6 @@ export default class Calendar extends Component {
 		Log.debug(API.ONPRESS, "day pressed:" + day.props.date.toISOString());
 		this._dayDetails.setDate(day.props.date);
 		EventRegister.emit(API.DAY_SELECTED, day);
-
-		/*
-		for (let i = 0; i < this._days.length; ++i) {
-			if (this.days[i].props.date != day.props.date) {
-				this._days[i].setSelected(false);
-			}	
-		}
-		day.setSelected(true);*/
-/*
-		if (this._editEvent) {
-			this._editEvent.setDate(day.props.date);
-		}*/
 	}
 
 	renderWeeks() {
@@ -253,31 +184,10 @@ export default class Calendar extends Component {
 		//var self = this;
 		Log.debug('calendar', '_onNewEventPress');
 		this.props.navigation.navigate('EditEvent', {date: this._dayDetails.state.date});
-		/*
-		this.setState({newEventPageVisible: !this.state.newEventPageVisible}, () => {
-			if (this._dayDetailsScrollView) {
-				setTimeout(() => {
-					self._dayDetailsScrollView.scrollToEnd({animated: true});
-				}, 100);
-			}
-		});*/
 	}
 
 	// when the user presses an event on the DayDetails
 	onEventPress(event) {
-		/*
-		var self = this;
-		this.setState({newEventPageVisible: true}, () => {
-			if (this._scrollView) {
-				setTimeout(() => {
-					if (this._editEvent)
-						this._editEvent.editEvent(event);
-
-					self._scrollView.scrollToEnd({animated: true});
-				}, 100);
-			}
-		});*/
-
 		this.props.navigation.navigate('EditEvent', {event: event});
 	}
 	
@@ -304,7 +214,7 @@ export default class Calendar extends Component {
 */
 		let calendarHeight = this.state.viewType == 'month' ? 400 : 280;
 		return (
-			<View style={styles.container} {...this.responder.panHandlers}>
+			<View style={styles.container}>
 
 				<ScrollView style={[styles.calendarContainer, {height: calendarHeight}]} ref={r => this._scrollView = r}
 					scrollEventThrottle={16} onScroll={e => {

@@ -16,9 +16,14 @@ export default class MenuLeft extends Component {
         this._onSettingsPress = this._onSettingsPress.bind(this);
     }
 
+    get navigation() {
+        return ;
+    }
+
     _onSettingsPress() {
         Log.debug(Log.ONPRESS, '_onSettingsPress');
-        this.props.navigation.navigate('Settings');
+        this.props.app.navigation.navigate('Settings');
+        this.props.app.closeDrawers();
     }
 
     _onTestNotificationPress() {
