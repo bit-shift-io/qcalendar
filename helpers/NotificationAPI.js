@@ -9,7 +9,7 @@ import moment from 'moment';
 
 // this shows how to handle notifcations and detect app moving into background
 // https://medium.com/@mstifflin/how-to-set-up-local-notifications-for-android-in-react-native-f062232c4be8
-
+/*
 // https://github.com/jamesisaac/react-native-background-task#installation
 BackgroundTask.define(() => {
     console.log('Hello from a background task');
@@ -35,7 +35,7 @@ BackgroundTask.define(() => {
 
     BackgroundTask.finish();
 })
-
+*/
 class NotificationAPI {
 
     async init() {

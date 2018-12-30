@@ -11,7 +11,9 @@ import {
   Platform, 
   StyleSheet, 
   Text, View, Button, Alert, Linking, 
-  DrawerLayoutAndroid} from 'react-native';
+  AsyncStorage,
+  DrawerLayoutAndroid
+} from 'react-native';
 
 // https://networksynapse.net/quick-introduction-to-react-natives-calendar-events/
 import RNCalendarEvents from 'react-native-calendar-events'; // calander
@@ -25,6 +27,7 @@ import Settings from './views/Settings';
 import * as ViewUtils from './helpers/ViewUtils'
 import NotificationAPI from './helpers/NotificationAPI';
 import API from './helpers/API';
+import BackgroundTask from 'react-native-background-task'
 
 import { createStackNavigator, createAppContainer, createDrawerNavigator } from 'react-navigation'
 
@@ -57,6 +60,30 @@ const MyDrawerNavigator = createDrawerNavigator({
 
 const AppContainer = createAppContainer(AppNavigator); //MyDrawerNavigator);
 
+
+function currentTimestamp(): string {
+  const d = new Date()
+  const z = n => n.toString().length == 1 ? `0${n}` : n // Zero pad
+  return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`
+}
+
+BackgroundTask.define(
+  async () => {
+    console.log('Hello from a background task')
+
+    const value = await AsyncStorage.getItem('@MySuperStore:times')
+    await AsyncStorage.setItem('@MySuperStore:times', `${value || ''}\n${currentTimestamp()}`)
+
+    // Or, instead of just setting a timestamp, do an http request
+    /* const response = await fetch('http://worldclockapi.com/api/json/utc/now')
+    const text = await response.text()
+    await AsyncStorage.setItem('@MySuperStore:times', text) */
+
+    BackgroundTask.finish()
+  },
+)
+
+
 type Props = {};
 export default class App extends Component<Props> {
 
@@ -74,6 +101,19 @@ export default class App extends Component<Props> {
       //isOpenRight: false,
       //selectedItem: 'About',
     }
+  }
+
+  componentDidMount() {
+    BackgroundTask.schedule()
+    this.checkStatus()
+  }
+
+  async checkStatus() {
+    const status = await BackgroundTask.statusAsync()
+    console.log(status.available)
+
+    const value = await AsyncStorage.getItem('@MySuperStore:times')
+    console.log('value', value)
   }
 
   componentWillMount () {
