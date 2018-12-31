@@ -4,7 +4,7 @@
 import PushNotification from 'react-native-push-notification';
 import Log from "./Log";
 import API from "./API";
-import BackgroundTask from 'react-native-background-task'
+//import BackgroundTask from 'react-native-background-task'
 import moment from 'moment';
 
 // this shows how to handle notifcations and detect app moving into background
@@ -37,7 +37,16 @@ BackgroundTask.define(() => {
 })
 */
 class NotificationAPI {
-
+/*
+    initBlocking() {
+        PushNotification.configure({
+            onNotification: function(notification) {
+              Log.debug('NotificationAPI', 'NOTIFICATION: ', notification);
+            },
+            popInitialNotification: true,
+        });
+    }
+*/
     async init() {
         PushNotification.configure({
             onNotification: function(notification) {
@@ -46,6 +55,7 @@ class NotificationAPI {
             popInitialNotification: true,
         });
 
+        /*
         const MIN_15 = 900;
         const HRS_24 = 86400;
         BackgroundTask.schedule({
@@ -54,8 +64,10 @@ class NotificationAPI {
 
         // Optional: Check if the device is blocking background tasks or not
         this.checkStatus()
+        */
     }
 
+    /*
     async checkStatus() {
         const status = await BackgroundTask.statusAsync()
         if (status.available) {
@@ -70,6 +82,7 @@ class NotificationAPI {
           Alert.alert('Restricted', 'Background tasks are restricted on your device')
         }
       }
+      */
 
     localNotification(notifcation) {
         PushNotification.localNotification(notifcation);

@@ -27,7 +27,9 @@ import Settings from './views/Settings';
 import * as ViewUtils from './helpers/ViewUtils'
 import NotificationAPI from './helpers/NotificationAPI';
 import API from './helpers/API';
-import BackgroundTask from 'react-native-background-task'
+//import BackgroundTask from 'react-native-background-task' // doesnt work with current ver RN
+import moment from 'moment';
+import BackgroundJob from 'react-native-background-job';
 
 import { createStackNavigator, createAppContainer, createDrawerNavigator } from 'react-navigation'
 
@@ -60,7 +62,45 @@ const MyDrawerNavigator = createDrawerNavigator({
 
 const AppContainer = createAppContainer(AppNavigator); //MyDrawerNavigator);
 
+const regularJobKey = "regularJobKey";
 
+BackgroundJob.register({
+  jobKey: regularJobKey,
+  job: () => { 
+    console.log(`Background Job fired!. Key = ${regularJobKey}`)
+    var notificationApi = NotificationAPI.init();
+    var api = API.init();
+
+    Promise.all([notificationApi, api]).then(() => {
+
+      var today = moment.utc();
+      var startDate = moment.utc().startOf('date');
+      var endDate = moment.utc().endOf('date');
+      var fetch = API.fetchEvents({startDate, endDate}); // TODO: stop this saving over the events key unless it merges them!
+      fetch.then(() => {
+        var events = API.getEventsForDate(today);
+        console.log("todays events:", events);
+        for (let i = 0; i < events.length; ++i) {
+          let event = events[i];
+          let date = moment.utc(event.startDate);
+          NotificationAPI.localNotificationSchedule({
+            message: event.title,
+            subText: event.description,
+            id: event.id,
+            date: date.toDate(),
+            group: 'qcalendar',
+          });
+        }
+      });
+/*
+      NotificationAPI.localNotification({
+        message: 'Test Background Notification',
+      });*/
+    });
+  }
+});
+
+/*
 function currentTimestamp(): string {
   const d = new Date()
   const z = n => n.toString().length == 1 ? `0${n}` : n // Zero pad
@@ -77,12 +117,12 @@ BackgroundTask.define(
     // Or, instead of just setting a timestamp, do an http request
     /* const response = await fetch('http://worldclockapi.com/api/json/utc/now')
     const text = await response.text()
-    await AsyncStorage.setItem('@MySuperStore:times', text) */
+    await AsyncStorage.setItem('@MySuperStore:times', text) * /
 
     BackgroundTask.finish()
   },
 )
-
+*/
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -104,17 +144,26 @@ export default class App extends Component<Props> {
   }
 
   componentDidMount() {
+    /*
     BackgroundTask.schedule()
     this.checkStatus()
-  }
+    */
 
+   BackgroundJob.schedule({
+      jobKey: regularJobKey,
+      //notificationTitle: "Notification title",
+      //notificationText: "Notification text",
+      period: 5000
+  });
+  }
+/*
   async checkStatus() {
     const status = await BackgroundTask.statusAsync()
     console.log(status.available)
 
     const value = await AsyncStorage.getItem('@MySuperStore:times')
     console.log('value', value)
-  }
+  }*/
 
   componentWillMount () {
     API.init();
