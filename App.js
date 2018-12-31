@@ -85,10 +85,11 @@ BackgroundJob.register({
           let date = moment.utc(event.startDate);
           NotificationAPI.localNotificationSchedule({
             message: event.title,
+            bigText: 'qwe',
             subText: event.description,
             id: event.id,
             date: date.toDate(),
-            group: 'qcalendar',
+            //group: 'qcalendar',
           });
         }
       });
