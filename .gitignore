@@ -23,4 +23,4 @@ local.properties
 android/app/build/*
 android/app/src/main/assets/fonts/*
 yarn.lock
-.vscode
+
